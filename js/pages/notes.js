@@ -503,7 +503,9 @@ async function renderNotes() {
           <h3 class="text-base font-bold text-gray-900 dark:text-white font-headline line-clamp-2">${note.title}</h3>
 
           <a href="./profile.html?userId=${note.uploaded_by_id}" class="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold w-fit">
-            <span class="material-symbols-outlined text-xs">account_circle</span>
+            ${uploader?.profile_picture_url
+              ? `<div class="w-14 h-14 rounded-full bg-cover bg-center flex-shrink-0 border border-gray-200 dark:border-gray-700" style="background-image:url('${uploader.profile_picture_url}')"></div>`
+              : `<span class="material-symbols-outlined text-xs">account_circle</span>`}
             <span>${uploaderName}</span>
           </a>
 

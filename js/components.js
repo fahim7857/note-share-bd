@@ -1,4 +1,5 @@
 import { appStore } from './store.js';
+import { supabase } from './supabase.js';
 
 export function renderHeader(activePage = 'home') {
   const user = appStore.getCurrentUser();
@@ -73,7 +74,7 @@ export function renderHeader(activePage = 'home') {
                 ? `
               <div class="relative group">
                 <a href="./profile.html" class="flex items-center gap-2 p-1.5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                  <img src="${user.avatar}" alt="${user.name}" class="w-8 h-8 rounded-xl object-cover border border-indigo-500/30" />
+                  <img src="${user.avatar}" alt="${user.name}" class="header-user-avatar w-8 h-8 rounded-xl object-cover border border-indigo-500/30" />
                   <span class="text-xs font-bold text-gray-800 dark:text-gray-200 truncate max-w-[100px]">${user.name}</span>
                 </a>
               </div>
@@ -170,7 +171,7 @@ export function renderHeader(activePage = 'home') {
           ? `
         <div class="space-y-2">
           <a href="./profile.html" class="flex items-center gap-3 p-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-bold">
-            <img src="${user.avatar}" alt="${user.name}" class="w-8 h-8 rounded-lg object-cover" />
+            <img src="${user.avatar}" alt="${user.name}" class="header-user-avatar w-8 h-8 rounded-lg object-cover" />
             <div class="truncate">
               <div class="truncate">${user.name}</div>
               <div class="text-[10px] text-gray-400 font-normal truncate">${user.email}</div>
@@ -318,4 +319,31 @@ export function setupHeaderEvents() {
 
   document.getElementById('header-logout-btn')?.addEventListener('click', performLogout);
   document.getElementById('mobile-logout-btn')?.addEventListener('click', performLogout);
+
+  // Replace the hardcoded/mock avatar with the user's real Supabase profile
+  // picture (if one has been uploaded), without touching any other markup.
+  syncHeaderAvatar();
+}
+
+// ── Pull the real profile picture from Supabase and patch the header <img>s ──
+function getHeaderSession() {
+  try { return JSON.parse(localStorage.getItem('al_session')) || null; }
+  catch { return null; }
+}
+
+async function syncHeaderAvatar() {
+  const session = getHeaderSession();
+  if (!session || !session.id) return;
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('profile_picture_url')
+    .eq('user_id', session.id)
+    .single();
+
+  if (error || !profile?.profile_picture_url) return;
+
+  document.querySelectorAll('.header-user-avatar').forEach((img) => {
+    img.src = profile.profile_picture_url;
+  });
 }
