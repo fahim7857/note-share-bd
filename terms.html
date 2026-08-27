@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notely | Terms &amp; Conditions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script>
+      if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+      /* ── Page-local extras ───────────────────────────────────────── */
+      html { scroll-behavior: smooth; }
+      section[id] { scroll-margin-top: 88px; }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        .animate-fade-in { animation: none !important; }
+      }
+
+      .toc-link {
+        display: block; font-size: 0.72rem; font-weight: 600;
+        color: #6b7280; padding: 7px 10px; border-radius: 10px;
+        border-left: 2px solid transparent; transition: all .15s;
+      }
+      .toc-link:hover { color: #4f46e5; background: #eef2ff; }
+      .dark .toc-link { color: #9ca3af; }
+      .dark .toc-link:hover { color: #a5b4fc; background: #312e81; }
+      .toc-link.active { color: #4f46e5; border-left-color: #4f46e5; background: #eef2ff; }
+      .dark .toc-link.active { color: #a5b4fc; border-left-color: #a5b4fc; background: #312e81; }
+
+      .theme-toggle-btn { transition: transform .2s ease; }
+      .theme-toggle-btn:active { transform: scale(0.9); }
+    </style>
+  </head>
+
+  <body class="bg-[#f9f9ff] dark:bg-[#0b0f19] text-[#151c27] dark:text-[#f3f4f6] font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- ══════════════════════════════════════════════
+         Minimal header (standalone — swap for your shared
+         app-header component if this lives inside the app shell)
+    ══════════════════════════════════════════════ -->
+    <header class="sticky top-0 z-40 bg-white/80 dark:bg-[#0b0f19]/80 backdrop-blur border-b border-gray-100 dark:border-gray-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <a href="./index.html" class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md">
+            <span class="material-symbols-outlined text-lg">auto_stories</span>
+          </div>
+          <span class="font-headline font-extrabold text-base text-gray-900 dark:text-white">Notely</span>
+        </a>
+        <div class="flex items-center gap-2">
+          <a href="./privacy-policy.html" class="hidden sm:inline-block px-4 py-2 rounded-xl text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+            Privacy Policy
+          </a>
+          <a href="./index.html" class="hidden sm:inline-block px-4 py-2 rounded-xl text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+            Home
+          </a>
+          <button id="theme-toggle-btn" aria-label="Toggle dark mode"
+            class="theme-toggle-btn w-9 h-9 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <span class="material-symbols-outlined text-lg" id="theme-toggle-icon">dark_mode</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+
+      <!-- Hero -->
+      <div class="animate-fade-in space-y-3 max-w-2xl">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold">
+          <span class="material-symbols-outlined text-sm">gavel</span> Legal
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold font-headline text-gray-900 dark:text-white">Terms &amp; Conditions</h1>
+        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+          The rules and regulations for using Notely's website and mobile application.
+          Effective Date: <span class="font-bold text-gray-700 dark:text-gray-300">August 12, 2026</span>.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 items-start">
+
+        <!-- TOC -->
+        <nav class="hidden lg:block sticky top-24 space-y-1" data-toc>
+          <p class="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 px-2.5 mb-2">On this page</p>
+          <a href="#terms-1" class="toc-link active">1. Account &amp; Responsibility</a>
+          <a href="#terms-2" class="toc-link">2. Content &amp; Conduct</a>
+          <a href="#terms-3" class="toc-link">3. Fair Use &amp; IP</a>
+          <a href="#terms-4" class="toc-link">4. Subscriptions &amp; Payments</a>
+          <a href="#terms-5" class="toc-link">5. Limitation of Liability</a>
+          <a href="#terms-6" class="toc-link">6. Modifications</a>
+          <a href="#terms-7" class="toc-link">7. Termination</a>
+        </nav>
+
+        <div class="space-y-5">
+
+          <section id="terms-1" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">how_to_reg</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-indigo-500 tracking-wider">SECTION 01</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">Account Registration &amp; User Responsibility</h2>
+              </div>
+            </div>
+            <ul class="space-y-2 text-xs text-gray-500 dark:text-gray-400">
+              <li class="flex gap-2"><span class="material-symbols-outlined text-indigo-400 text-sm mt-0.5">check_circle</span>To access features like uploading or downloading notes, you must register with accurate personal and academic information.</li>
+              <li class="flex gap-2"><span class="material-symbols-outlined text-indigo-400 text-sm mt-0.5">check_circle</span>You're responsible for keeping your credentials confidential and for all activity under your account.</li>
+              <li class="flex gap-2"><span class="material-symbols-outlined text-indigo-400 text-sm mt-0.5">check_circle</span>You must be at least 13 (or the legal age in your jurisdiction) to use Notely.</li>
+            </ul>
+          </section>
+
+          <section id="terms-2" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">rule</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-indigo-500 tracking-wider">SECTION 02</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">User Content &amp; Code of Conduct</h2>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">By uploading content to Notely, you agree that you will not:</p>
+            <ul class="space-y-2 text-xs text-gray-500 dark:text-gray-400">
+              <li class="flex gap-2"><span class="material-symbols-outlined text-rose-400 text-sm mt-0.5">cancel</span>Upload content that is offensive, illegal, harmful, sexually explicit, or defamatory.</li>
+              <li class="flex gap-2"><span class="material-symbols-outlined text-rose-400 text-sm mt-0.5">cancel</span>Upload fraudulent materials, fake exam questions, or content that violates copyright or IP rights.</li>
+            </ul>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+              Notely may review, flag, or remove uploaded content and suspend accounts that break these rules, without prior notice.
+            </p>
+          </section>
+
+          <section id="terms-3" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">copyright</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-indigo-500 tracking-wider">SECTION 03</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">Fair Use &amp; Intellectual Property</h2>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+              All branding, UI design, code, logos, and features of Notely belong exclusively to Notely and its parent agency.
+              Shared study materials are for personal educational use only — commercial resale or redistribution elsewhere is strictly prohibited.
+            </p>
+          </section>
+
+          <section id="terms-4" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">payments</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-indigo-500 tracking-wider">SECTION 04</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">Subscriptions, Payments &amp; Premium Features</h2>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+              Notely offers free, ad-supported features alongside optional paid Premium plans — ad-free browsing, advanced search,
+              and higher download limits. All subscription payments are non-refundable unless explicitly stated otherwise at checkout.
+            </p>
+          </section>
+
+          <section id="terms-5" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">balance</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-indigo-500 tracking-wider">SECTION 05</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">Limitation of Liability</h2>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+              Notely is a platform for student-to-student sharing. While we encourage community verification, we don't guarantee
+              the accuracy, completeness, or academic outcome of any uploaded notes or AI-generated summaries. Use materials at your own discretion.
+            </p>
+          </section>
+
+          <section id="terms-6" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">update</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-indigo-500 tracking-wider">SECTION 06</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">Modifications to Terms</h2>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+              We may revise these Terms at any time. Updates are posted here with a new effective date — continuing to use
+              Notely after changes go live means you accept the updated terms.
+            </p>
+          </section>
+
+          <section id="terms-7" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">block</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-rose-500 tracking-wider">SECTION 07</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">Termination</h2>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+              We may suspend or terminate your access to Notely immediately, without prior notice or liability, for any reason —
+              including a breach of these Terms and Conditions.
+            </p>
+          </section>
+
+          <!-- Cross-link to Privacy Policy -->
+          <a href="./privacy-policy.html" class="animate-fade-in flex items-center justify-between gap-2 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl p-4 hover:bg-indigo-100 dark:hover:bg-indigo-950/60 transition-all group">
+            <span class="flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400">
+              <span class="material-symbols-outlined text-lg">shield_lock</span>
+              Read our Privacy Policy
+            </span>
+            <span class="material-symbols-outlined text-indigo-500 text-lg group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+          </a>
+
+        </div>
+      </div>
+
+    </main>
+
+    <footer class="border-t border-gray-100 dark:border-gray-800 mt-auto">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p class="text-[11px] text-gray-400">© 2026 Notely. All rights reserved.</p>
+        <div class="flex items-center gap-4 text-[11px] font-semibold text-gray-400">
+          <a href="./index.html" class="hover:text-indigo-600 dark:hover:text-indigo-400">Home</a>
+          <a href="./privacy-policy.html" class="hover:text-indigo-600 dark:hover:text-indigo-400">Privacy</a>
+          <a href="mailto:faizulislumdk@gmail.com" class="hover:text-indigo-600 dark:hover:text-indigo-400">Support</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // ── Theme toggle ─────────────────────────────────────────────
+      const themeBtn  = document.getElementById('theme-toggle-btn');
+      const themeIcon = document.getElementById('theme-toggle-icon');
+      const syncThemeIcon = () => {
+        themeIcon.textContent = document.documentElement.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+      };
+      syncThemeIcon();
+      themeBtn?.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        syncThemeIcon();
+      });
+
+      // ── TOC scrollspy ────────────────────────────────────────────
+      const nav = document.querySelector('nav[data-toc]');
+      if (nav) {
+        const links = nav.querySelectorAll('.toc-link');
+        const sections = Array.from(links).map((l) => document.querySelector(l.getAttribute('href')));
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const idx = sections.indexOf(entry.target);
+            if (idx === -1) return;
+            links.forEach((l) => l.classList.remove('active'));
+            links[idx].classList.add('active');
+          });
+        }, { rootMargin: '-100px 0px -70% 0px' });
+
+        sections.forEach((s) => s && observer.observe(s));
+      }
+    </script>
+  </body>
+</html>

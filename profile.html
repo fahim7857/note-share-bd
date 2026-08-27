@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AcademiaLink | Student Profile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script>
+      if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+      .autocomplete-wrap { position: relative; }
+      .autocomplete-list {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0; right: 0;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 100;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+        display: none;
+      }
+      .dark .autocomplete-list { background: #1f2937; border-color: #374151; }
+      .autocomplete-list.open { display: block; }
+      .autocomplete-item {
+        padding: 8px 14px;
+        font-size: 0.72rem;
+        cursor: pointer;
+        color: #374151;
+        transition: background 0.15s;
+      }
+      .dark .autocomplete-item { color: #d1d5db; }
+      .autocomplete-item:hover, .autocomplete-item.active { background: #eef2ff; color: #4f46e5; }
+      .dark .autocomplete-item:hover, .dark .autocomplete-item.active { background: #312e81; color: #a5b4fc; }
+
+      .type-btn {
+        flex: 1; padding: 10px; border-radius: 10px;
+        font-size: 0.72rem; font-weight: 700;
+        border: 2px solid #e5e7eb; background: #f9fafb; color: #6b7280;
+        cursor: pointer; transition: all 0.2s;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+      }
+      .dark .type-btn { border-color: #374151; background: #1f2937; color: #9ca3af; }
+      .type-btn.selected { border-color: #6366f1; background: #eef2ff; color: #4f46e5; }
+      .dark .type-btn.selected { background: #312e81; color: #a5b4fc; border-color: #6366f1; }
+
+      .section-fields { display: none; animation: fadeIn 0.2s ease; }
+      .section-fields.active { display: block; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+      .complete-banner {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        border-radius: 20px; padding: 20px 24px;
+        color: white; display: flex; align-items: center; gap: 14px;
+      }
+
+      /* Delete confirm modal */
+      .delete-modal-overlay {
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(4px);
+      }
+      .delete-confirm-input:focus {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 2px rgba(239,68,68,0.2);
+      }
+
+      /* Profile picture uploader (edit modal) */
+      #profile-picture-preview {
+        background-size: cover;
+        background-position: center;
+      }
+    </style>
+  </head>
+
+  <body class="bg-[#f9f9ff] dark:bg-[#0b0f19] text-[#151c27] dark:text-[#f3f4f6] font-sans antialiased min-h-screen flex flex-col">
+    <div id="app-header"></div>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div id="profile-content" class="space-y-8">
+        <!-- Rendered via profile.js -->
+      </div>
+    </main>
+
+    <!-- ══════════════════════════════════════════════
+         Modal: Complete / Edit Profile (unchanged)
+    ══════════════════════════════════════════════ -->
+    <div id="edit-profile-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-lg w-full p-6 space-y-5 border border-gray-100 dark:border-gray-800 shadow-2xl relative max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white font-headline flex items-center gap-2">
+            <span class="material-symbols-outlined text-indigo-600">badge</span>
+            <span id="modal-title">Complete Your Profile</span>
+          </h3>
+          <button id="close-edit-modal-btn" class="p-1.5 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800">
+            <span class="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+
+        <form id="edit-profile-form" class="space-y-4" novalidate>
+          <!-- Profile picture (optional) -->
+          <div class="flex flex-col items-center gap-2 pb-1">
+            <div class="relative">
+              <div id="profile-picture-preview"
+                class="w-24 h-24 rounded-3xl bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-3xl font-extrabold border-4 border-indigo-500/20 shadow-md select-none">
+              </div>
+              <button type="button" id="change-picture-btn" title="Change photo"
+                class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-base">photo_camera</span>
+              </button>
+            </div>
+            <input type="file" id="profile-picture-input" accept="image/png, image/jpeg, image/webp" class="hidden" />
+            <button type="button" id="remove-picture-btn" class="text-[11px] font-bold text-rose-500 hover:underline hidden">Remove Photo</button>
+            <p id="profile-picture-error" class="text-[11px] text-red-500 hidden"></p>
+            <p class="text-[10px] text-gray-400">Optional · JPG, PNG or WEBP · up to 3MB</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Full Name *</label>
+            <input type="text" id="profile-name-input" required placeholder="e.g. Tanvir Hasan"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">I am a *</label>
+            <div class="flex gap-3">
+              <button type="button" class="type-btn" id="btn-university" data-type="university">
+                <span class="material-symbols-outlined text-base">school</span> University Student
+              </button>
+              <button type="button" class="type-btn" id="btn-school" data-type="school_college">
+                <span class="material-symbols-outlined text-base">menu_book</span> School / College
+              </button>
+            </div>
+            <input type="hidden" id="institution-type-val" value="" />
+          </div>
+
+          <div class="section-fields space-y-4" id="section-university">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">University Name *</label>
+              <div class="autocomplete-wrap">
+                <input type="text" id="profile-univ-input" autocomplete="off" placeholder="Type your university name…"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+                <div class="autocomplete-list" id="univ-dropdown"></div>
+              </div>
+            </div>
+
+          <div class="section-fields space-y-4" id="section-school">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">School / College Name *</label>
+              <input type="text" id="profile-school-name-input" placeholder="e.g. Dhaka College"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Class *</label>
+                <select id="profile-class-input"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  <option value="">Select class…</option>
+                  <optgroup label="Secondary">
+                    <option value="Class 6">Class 6</option>
+                    <option value="Class 7">Class 7</option>
+                    <option value="Class 8">Class 8</option>
+                    <option value="Class 9">Class 9</option>
+                    <option value="Class 10">Class 10 (SSC)</option>
+                  </optgroup>
+                  <optgroup label="Higher Secondary">
+                    <option value="HSC 1st Year">HSC 1st Year</option>
+                    <option value="HSC 2nd Year">HSC 2nd Year</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Group *</label>
+                <select id="profile-group-input"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  <option value="">Select group…</option>
+                  <option value="Science">Science</option>
+                  <option value="Humanities">Humanities</option>
+                  <option value="Business Studies">Business Studies</option>
+                  <option value="Madrasha">Madrasha</option>
+                  <option value="General">General</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Bio / About You</label>
+            <textarea id="profile-bio-input" rows="3" placeholder="Share your academic interests, goals…"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+          </div>
+
+          <p id="profile-form-error" class="text-xs text-red-500 hidden"></p>
+
+          <button type="submit" id="profile-save-btn"
+            class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl text-xs shadow-md transition-all">
+            Save Profile
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         Modal: Delete Account Confirmation
+    ══════════════════════════════════════════════ -->
+    <div id="delete-account-modal" class="fixed inset-0 z-[60] delete-modal-overlay hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-sm w-full p-6 space-y-5 border border-rose-200 dark:border-rose-900/50 shadow-2xl">
+
+        <!-- Header -->
+        <div class="text-center space-y-3">
+          <div class="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-950/50 flex items-center justify-center mx-auto">
+            <span class="material-symbols-outlined text-3xl text-rose-600">delete_forever</span>
+          </div>
+          <h3 class="text-lg font-extrabold text-gray-900 dark:text-white font-headline">Delete Account</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+            This will <strong class="text-rose-600">permanently delete</strong> your account, profile, and all uploaded notes. This action <strong>cannot be undone.</strong>
+          </p>
+        </div>
+
+        <!-- Confirmation input -->
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+            Type <span class="text-rose-600 font-mono">DELETE</span> to confirm
+          </label>
+          <input type="text" id="delete-confirm-input"
+            placeholder="Type DELETE here…"
+            class="delete-confirm-input w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs outline-none transition-all" />
+          <p id="delete-confirm-error" class="text-[11px] text-rose-500 hidden">Please type DELETE exactly to confirm.</p>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3">
+          <button id="delete-cancel-btn"
+            class="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+            Cancel
+          </button>
+          <button id="delete-confirm-btn"
+            class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-sm">delete_forever</span>
+            Delete Forever
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="app-footer"></div>
+    <script type="module" src="./js/pages/profile.js"></script>
+  </body>
+</html>

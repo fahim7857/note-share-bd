@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AcademiaLink | Home Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script>
+      if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+  </head>
+  <body class="bg-[#f9f9ff] dark:bg-[#0b0f19] text-[#151c27] dark:text-[#f3f4f6] font-sans antialiased min-h-screen flex flex-col">
+    <!-- Header -->
+    <div id="app-header"></div>
+
+<!-- Hero Image Slider -->
+<div id="hero-slider" class="relative w-[92%] max-w-6xl mx-auto mt-6 h-[220px] sm:h-[320px] lg:h-[400px] overflow-hidden rounded-3xl shadow-xl">
+  <div id="hero-slider-track" class="relative h-full w-full">
+    <div class="hero-slide">
+      <img src="./pics/slide-1.png" alt="Slide 1" class="w-full h-full object-cover" />
+    </div>
+    <div class="hero-slide">
+      <img src="./pics/slide-2.png" alt="Slide 2" class="w-full h-full object-cover" />
+    </div>
+    <div class="hero-slide">
+      <img src="./pics/slide-3.png" alt="Slide 3" class="w-full h-full object-cover" />
+    </div>
+  </div>
+  <div id="hero-slider-dots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10"></div>
+</div>
+
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+      <!-- Hero Banner -->
+      <section class="relative bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 rounded-3xl p-8 sm:p-12 text-white overflow-hidden shadow-2xl">
+        <div class="relative z-10 max-w-2xl space-y-6">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-indigo-200 text-xs font-semibold">
+            <span class="material-symbols-outlined text-sm">verified</span>
+            <span>Centralized Academic Hub for Bangladeshi Universities</span>
+          </div>
+          <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight font-headline leading-tight">
+            Share Notes, Master Courses & Find Opportunities
+          </h1>
+          <p class="text-sm sm:text-base text-indigo-100 font-normal leading-relaxed">
+            Access lecture sheets, previous exam solutions, and course guides from top Bangladeshi universities.
+          </p>
+
+          <!-- Search Bar -->
+          <form id="hero-search-form" class="flex flex-col sm:flex-row gap-3 pt-2">
+            <div class="relative flex-grow">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+              <input
+                type="text"
+                id="hero-search-input"
+                placeholder="Search course, subject or notes..."
+                class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 text-gray-900 dark:text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-md"
+              />
+            </div>
+            <button type="submit" class="px-6 py-3.5 bg-indigo-500 hover:bg-indigo-400 text-white font-bold rounded-2xl shadow-lg transition-all text-sm flex items-center justify-center gap-2">
+              <span>Find Notes</span>
+              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="absolute -right-12 -bottom-12 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      </section>
+
+      <!-- Quick Action Navigation Cards -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <a href="./notes.html" class="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-2xl">menu_book</span>
+          </div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white font-headline group-hover:text-indigo-600">Course Notes</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Browse verified lecture sheets and PDF files.</p>
+        </a>
+
+        <a href="./profile.html" class="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-2xl">badge</span>
+          </div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white font-headline group-hover:text-amber-600">My Profile</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Update academic info, view saved notes & uploads.</p>
+        </a>
+
+        <a href="./admin.html" class="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-2xl">admin_panel_settings</span>
+          </div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white font-headline group-hover:text-rose-600">Admin Portal</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Moderate reports, manage users and notes.</p>
+        </a>
+      </section>
+
+      <!-- Recent Notes -->
+      <section class="space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white font-headline">Recent Academic Notes</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Explore notes uploaded by verified students</p>
+          </div>
+          <a href="./notes.html" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+            <span>View All Notes</span>
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </a>
+        </div>
+        <div id="recent-notes-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Rendered via home.js -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <div id="app-footer"></div>
+
+    <script type="module" src="./js/pages/home.js"></script>
+       <script type="module" src="./js/pages/hero-slider.js"></script>
+  </body>
+</html>

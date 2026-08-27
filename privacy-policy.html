@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notely | Privacy Policy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script>
+      if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+      /* ── Page-local extras ───────────────────────────────────────── */
+      html { scroll-behavior: smooth; }
+      section[id] { scroll-margin-top: 88px; }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        .animate-fade-in { animation: none !important; }
+      }
+
+      .toc-link {
+        display: block; font-size: 0.72rem; font-weight: 600;
+        color: #6b7280; padding: 7px 10px; border-radius: 10px;
+        border-left: 2px solid transparent; transition: all .15s;
+      }
+      .toc-link:hover { color: #4f46e5; background: #eef2ff; }
+      .dark .toc-link { color: #9ca3af; }
+      .dark .toc-link:hover { color: #a5b4fc; background: #312e81; }
+      .toc-link.active { color: #4f46e5; border-left-color: #4f46e5; background: #eef2ff; }
+      .dark .toc-link.active { color: #a5b4fc; border-left-color: #a5b4fc; background: #312e81; }
+
+      .theme-toggle-btn { transition: transform .2s ease; }
+      .theme-toggle-btn:active { transform: scale(0.9); }
+
+      .copy-btn.copied { color: #059669 !important; }
+    </style>
+  </head>
+
+  <body class="bg-[#f9f9ff] dark:bg-[#0b0f19] text-[#151c27] dark:text-[#f3f4f6] font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- ══════════════════════════════════════════════
+         Minimal header (standalone — swap for your shared
+         app-header component if this lives inside the app shell)
+    ══════════════════════════════════════════════ -->
+    <header class="sticky top-0 z-40 bg-white/80 dark:bg-[#0b0f19]/80 backdrop-blur border-b border-gray-100 dark:border-gray-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <a href="./index.html" class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md">
+            <span class="material-symbols-outlined text-lg">auto_stories</span>
+          </div>
+          <span class="font-headline font-extrabold text-base text-gray-900 dark:text-white">Notely</span>
+        </a>
+        <div class="flex items-center gap-2">
+          <a href="./terms.html" class="hidden sm:inline-block px-4 py-2 rounded-xl text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+            Terms &amp; Conditions
+          </a>
+          <a href="./index.html" class="hidden sm:inline-block px-4 py-2 rounded-xl text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+            Home
+          </a>
+          <button id="theme-toggle-btn" aria-label="Toggle dark mode"
+            class="theme-toggle-btn w-9 h-9 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <span class="material-symbols-outlined text-lg" id="theme-toggle-icon">dark_mode</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+
+      <!-- Hero -->
+      <div class="animate-fade-in space-y-3 max-w-2xl">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold">
+          <span class="material-symbols-outlined text-sm">shield_lock</span> Legal
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold font-headline text-gray-900 dark:text-white">Privacy Policy</h1>
+        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+          How Notely collects, uses, and protects your information.
+          Effective Date: <span class="font-bold text-gray-700 dark:text-gray-300">August 12, 2026</span>.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 items-start">
+
+        <!-- TOC -->
+        <nav class="hidden lg:block sticky top-24 space-y-1" data-toc>
+          <p class="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 px-2.5 mb-2">On this page</p>
+          <a href="#privacy-1" class="toc-link active">1. Information We Collect</a>
+          <a href="#privacy-2" class="toc-link">2. How We Use It</a>
+          <a href="#privacy-3" class="toc-link">3. Data Security &amp; Storage</a>
+          <a href="#privacy-4" class="toc-link">4. Account Deletion</a>
+          <a href="#privacy-5" class="toc-link">5. Third-Party Services</a>
+          <a href="#privacy-6" class="toc-link">6. Contact Us</a>
+        </nav>
+
+        <div class="space-y-5">
+
+          <section id="privacy-1" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">fingerprint</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-indigo-500 tracking-wider">SECTION 01</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">Information We Collect</h2>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+              When you register or update your profile on Notely, we collect:
+            </p>
+            <div class="grid sm:grid-cols-2 gap-3">
+              <div class="bg-gray-50 dark:bg-gray-800/40 p-3.5 rounded-2xl">
+                <span class="text-gray-400 text-[11px] font-bold block mb-1">Personal Identifiers</span>
+                <span class="text-xs text-gray-700 dark:text-gray-300">Your name and email address.</span>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-800/40 p-3.5 rounded-2xl">
+                <span class="text-gray-400 text-[11px] font-bold block mb-1">Academic Information</span>
+                <span class="text-xs text-gray-700 dark:text-gray-300">Institution name, class/level, and field or subject of study.</span>
+              </div>
+            </div>
+          </section>
+
+          <section id="privacy-2" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">tune</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-indigo-500 tracking-wider">SECTION 02</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">How We Use Your Information</h2>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+              We use your data strictly to provide, personalize, and improve your experience — to set up and manage your profile,
+              show relevant notes based on your institution, class, and subject, and keep the platform secure from fraudulent activity.
+            </p>
+            <div class="flex items-start gap-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl p-3.5">
+              <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-lg flex-shrink-0">verified</span>
+              <p class="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold leading-relaxed">
+                We never sell, rent, or trade your personal information for marketing or external business purposes.
+              </p>
+            </div>
+          </section>
+
+          <section id="privacy-3" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">shield_lock</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-indigo-500 tracking-wider">SECTION 03</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">Data Security &amp; Storage</h2>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+              Notely runs on enterprise-grade backend infrastructure powered by Supabase, with encrypted data storage,
+              SSL transmission, and strict database access controls — keeping your academic and personal information
+              secured against unauthorized access, alteration, or disclosure.
+            </p>
+          </section>
+
+          <section id="privacy-4" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">delete_forever</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-rose-500 tracking-wider">SECTION 04</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">Account Deletion &amp; Right to Be Forgotten</h2>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+              Every user can delete their account and associated data at any time. Once deleted, all personal profile
+              details — name, email, institution, class, and subject — are permanently purged from our primary database.
+            </p>
+            <a href="./profile.html" class="flex items-center justify-between gap-2 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-3.5 hover:bg-rose-100 dark:hover:bg-rose-950/50 transition-all group">
+              <span class="text-[11px] font-bold text-rose-600 dark:text-rose-400">Manage or delete your account from your Profile page</span>
+              <span class="material-symbols-outlined text-rose-500 text-lg group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+            </a>
+          </section>
+
+          <section id="privacy-5" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">campaign</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-indigo-500 tracking-wider">SECTION 05</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">Third-Party Services &amp; Advertisements</h2>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+              To keep Notely free, we may show third-party ads (e.g. Google AdSense/AdMob) or use analytics tools.
+              These networks may use cookies, SDKs, or device identifiers to serve relevant ads, but they never receive
+              your private profile data — your institution or email stay with us.
+            </p>
+          </section>
+
+          <section id="privacy-6" class="animate-fade-in bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">mail</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-extrabold text-indigo-500 tracking-wider">SECTION 06</p>
+                <h2 class="text-sm font-bold font-headline text-gray-900 dark:text-white">Contact Us</h2>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Questions about this Privacy Policy? Reach out anytime.</p>
+            <div class="flex items-center justify-between gap-2 bg-gray-50 dark:bg-gray-800/40 rounded-2xl p-3.5">
+              <a href="mailto:faizulislumdk@gmail.com" class="text-xs font-bold text-indigo-600 dark:text-indigo-400">faizulislumdk@gmail.com</a>
+              <button class="copy-email-btn copy-btn flex items-center gap-1 text-[11px] font-bold text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400" data-email="faizulislumdk@gmail.com">
+                <span class="material-symbols-outlined text-sm copy-icon">content_copy</span>
+                <span class="copy-label">Copy</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- Cross-link to Terms -->
+          <a href="./terms.html" class="animate-fade-in flex items-center justify-between gap-2 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl p-4 hover:bg-indigo-100 dark:hover:bg-indigo-950/60 transition-all group">
+            <span class="flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400">
+              <span class="material-symbols-outlined text-lg">description</span>
+              Read our Terms &amp; Conditions
+            </span>
+            <span class="material-symbols-outlined text-indigo-500 text-lg group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+          </a>
+
+        </div>
+      </div>
+
+    </main>
+
+    <footer class="border-t border-gray-100 dark:border-gray-800 mt-auto">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p class="text-[11px] text-gray-400">© 2026 Notely. All rights reserved.</p>
+        <div class="flex items-center gap-4 text-[11px] font-semibold text-gray-400">
+          <a href="./index.html" class="hover:text-indigo-600 dark:hover:text-indigo-400">Home</a>
+          <a href="./terms.html" class="hover:text-indigo-600 dark:hover:text-indigo-400">Terms</a>
+          <a href="mailto:faizulislumdk@gmail.com" class="hover:text-indigo-600 dark:hover:text-indigo-400">Support</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // ── Theme toggle ─────────────────────────────────────────────
+      const themeBtn  = document.getElementById('theme-toggle-btn');
+      const themeIcon = document.getElementById('theme-toggle-icon');
+      const syncThemeIcon = () => {
+        themeIcon.textContent = document.documentElement.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+      };
+      syncThemeIcon();
+      themeBtn?.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        syncThemeIcon();
+      });
+
+      // ── TOC scrollspy ────────────────────────────────────────────
+      const nav = document.querySelector('nav[data-toc]');
+      if (nav) {
+        const links = nav.querySelectorAll('.toc-link');
+        const sections = Array.from(links).map((l) => document.querySelector(l.getAttribute('href')));
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const idx = sections.indexOf(entry.target);
+            if (idx === -1) return;
+            links.forEach((l) => l.classList.remove('active'));
+            links[idx].classList.add('active');
+          });
+        }, { rootMargin: '-100px 0px -70% 0px' });
+
+        sections.forEach((s) => s && observer.observe(s));
+      }
+
+      // ── Copy email ───────────────────────────────────────────────
+      document.querySelectorAll('.copy-email-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const email = btn.getAttribute('data-email');
+          try {
+            await navigator.clipboard.writeText(email);
+            const icon  = btn.querySelector('.copy-icon');
+            const label = btn.querySelector('.copy-label');
+            icon.textContent = 'check';
+            label.textContent = 'Copied';
+            btn.classList.add('copied');
+            setTimeout(() => {
+              icon.textContent = 'content_copy';
+              label.textContent = 'Copy';
+              btn.classList.remove('copied');
+            }, 1600);
+          } catch (e) {
+            console.error('Copy failed', e);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

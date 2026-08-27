@@ -1,0 +1,224 @@
+html, body {
+  overflow-x: hidden;
+}@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   BASE — global element defaults, fonts, colors
+   ============================================================ */
+@layer base {
+  :root {
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-headline: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+  body {
+    background: #030129;
+    background: linear-gradient(32deg, rgba(3, 1, 41, 1) 0%, rgba(41, 41, 153, 1) 35%, rgba(235, 239, 240, 1) 100%);
+    color: var(--color-gray-900);
+  }
+  :where(.dark) body {
+    background-color: var(--color-gray-950);
+    color: var(--color-gray-100);
+  }
+}
+
+/* ============================================================
+   UTILITIES — small reusable helper classes
+   ============================================================ */
+.font-headline {
+  font-family: var(--font-headline);
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+/* ============================================================
+   COMPONENTS — page/section-specific rules
+   notes.html, jobs.html, profile.html, admin.html — sob page-er
+   custom CSS ekhane niche add koro. Alada .css file lagbe na,
+   shob ekhane rakhle sob page automatic pabe (./css/style.css
+   link kora thakle).
+   ============================================================ */
+   /* ─────────────────────────────────────────────────────────────────────────
+   Self-hosted fonts (replaces Google Fonts CDN <link> tags).
+   Why: a Capacitor WebView (capacitor://localhost or file://) has no
+   guaranteed network access to fonts.googleapis.com / fonts.gstatic.com,
+   especially the first time the app opens offline. Shipping the font files
+   inside the app bundle means text renders correctly on the very first
+   frame, in the browser AND in the wrapped app, with no code change needed
+   later.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Inter — body text */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/inter/inter-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/inter/inter-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/inter/inter-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/inter/inter-700.woff2') format('woff2');
+}
+
+/* Plus Jakarta Sans — headings / .font-headline */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/plus-jakarta-sans/pjs-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/plus-jakarta-sans/pjs-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/plus-jakarta-sans/pjs-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/plus-jakarta-sans/pjs-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('../fonts/plus-jakarta-sans/pjs-800.woff2') format('woff2');
+}
+
+/* Material Symbols Outlined — self-hosted, FULL icon set (~3.8MB, one-time
+   cached download on web / bundled asset with zero network cost inside a
+   Capacitor app).
+   Why not subsetted: this icon font builds each icon through a chain of
+   "successive ligation" substitutions (OpenType 'rlig'/'rclt' features), not
+   simple one-shot ligatures. A naive glyph-closure subset (fonttools
+   pyftsubset) either breaks rendering or barely shrinks the file, and the
+   only way to confirm it's correct is visually checking every icon in a
+   real browser — not something to ship unverified. If you want to shrink
+   this later, use Google's own subsetting endpoint (the `text=` parameter
+   on the Material Symbols Google Fonts CSS URL) to generate a verified
+   subset, then download and self-host THAT file the same way. */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;
+  src: url('../fonts/material-symbols/material-symbols-outlined.woff2') format('woff2');
+}
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga';
+}
+
+/* Hide the scrollbar on the hero slider (Chrome, Safari, Firefox, Edge) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Hero slider: images stacked, animated with depth, direction-aware */
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 1;
+  transition: transform 0.9s ease-in-out, opacity 0.7s ease-in-out;
+  pointer-events: none;
+}
+
+.hero-slide.pos-right {
+  transform: translateX(100%) scale(0.85);
+  opacity: 0;
+  z-index: 2;
+}
+
+.hero-slide.pos-left {
+  transform: translateX(-100%) scale(0.85);
+  opacity: 0;
+  z-index: 2;
+}
+
+.hero-slide.pos-center {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+.hero-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.3s ease, width 0.3s ease;
+}
+
+.hero-dot.is-current {
+  background: #ffffff;
+  width: 20px;
+}

@@ -1,0 +1,25 @@
+{
+  "hash": "1f6a92b1",
+  "configHash": "cd0407fb",
+  "lockfileHash": "1a1fd1e1",
+  "browserHash": "7beec057",
+  "optimized": {
+    "@supabase/supabase-js": {
+      "src": "../../New folder/Note revised/Note revised/node_modules/@supabase/supabase-js/dist/index.mjs",
+      "file": "@supabase_supabase-js.js",
+      "fileHash": "07067546",
+      "needsInterop": false
+    },
+    "bcryptjs": {
+      "src": "../../New folder/Note revised/Note revised/node_modules/bcryptjs/index.js",
+      "file": "bcryptjs.js",
+      "fileHash": "9e1ad7ab",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-5WRI5ZAA": {
+      "file": "chunk-5WRI5ZAA.js"
+    }
+  }
+}

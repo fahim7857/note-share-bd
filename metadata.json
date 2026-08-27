@@ -1,0 +1,6 @@
+{
+  "name": "AcademiaLink",
+  "description": "Academic hub for university students to share notes and connect across Bangladesh.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

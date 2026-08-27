@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AcademiaLink | PDF Document Reader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script>
+      if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+    <style>
+      #pdf-canvas-wrap {
+        background: #525659;
+        min-height: 70vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px 8px;
+        gap: 12px;
+        border-radius: 0 0 1.5rem 1.5rem;
+        overflow-y: auto;
+      }
+      #pdf-canvas-wrap canvas {
+        max-width: 100%;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+        border-radius: 4px;
+      }
+      .pdf-ctrl-btn {
+        display: flex; align-items: center; gap: 4px;
+        padding: 6px 14px; border-radius: 10px;
+        font-size: 0.72rem; font-weight: 700;
+        border: none; cursor: pointer; transition: all 0.15s;
+        background: white; color: #374151;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      }
+      .dark .pdf-ctrl-btn { background: #1f2937; color: #d1d5db; }
+      .pdf-ctrl-btn:hover:not(:disabled) { background: #eef2ff; color: #4f46e5; }
+      .dark .pdf-ctrl-btn:hover:not(:disabled) { background: #312e81; color: #a5b4fc; }
+      .pdf-ctrl-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+      .skeleton {
+        background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite; border-radius: 10px;
+      }
+      .dark .skeleton {
+        background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+        background-size: 200% 100%;
+      }
+      @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+      .star-btn {
+        background: none; border: none; cursor: pointer;
+        color: #d1d5db; font-size: 22px;
+        transition: color 0.15s, transform 0.1s; line-height: 1;
+      }
+      .star-btn:hover, .star-btn.active { color: #f59e0b; transform: scale(1.15); }
+      .star-btn.filled { color: #f59e0b; }
+
+      /* ── Full-screen Ad Modal ──
+         NOTE: no skip button anymore on purpose. The modal auto-closes
+         either when the real interstitial ad (AdMob, native app) reports
+         itself dismissed, or — if no ad could be loaded/shown (plain
+         website, or the ad failed) — after a short fixed wait. See
+         js/pages/pdf-viewer.js: handleDownloadClick(). */
+      #ad-modal {
+        background: rgba(0,0,0,0.92);
+        backdrop-filter: blur(8px);
+      }
+      .ad-spinner {
+        width: 40px; height: 40px; border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.15);
+        border-top-color: #6366f1;
+        animation: ad-spin 0.8s linear infinite;
+      }
+      @keyframes ad-spin { to { transform: rotate(360deg); } }
+      .ad-slot-box {
+        width: 100%; max-width: 420px; min-height: 220px;
+        border: 2px dashed rgba(255,255,255,0.15); border-radius: 20px;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center; gap: 8px;
+        color: rgba(255,255,255,0.4); font-size: 0.75rem; font-weight: 600;
+      }
+    </style>
+  </head>
+
+  <body class="bg-[#f9f9ff] dark:bg-[#0b0f19] text-[#151c27] dark:text-[#f3f4f6] font-sans antialiased min-h-screen flex flex-col">
+    <div id="app-header"></div>
+
+    <main class="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <a href="./notes.html"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 text-xs font-bold hover:text-indigo-600 transition-colors shadow-sm">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          Back to Notes
+        </a>
+        <div id="pdf-header-actions" class="flex items-center gap-2 flex-wrap"></div>
+      </div>
+
+      <div id="pdf-skeleton" class="space-y-4">
+        <div class="skeleton h-32 w-full"></div>
+        <div class="skeleton h-[60vh] w-full"></div>
+      </div>
+
+      <div id="pdf-viewer-content" class="space-y-5 hidden"></div>
+    </main>
+
+    <!-- ══ Ad Modal (no manual skip — auto-continues) ══ -->
+    <div id="ad-modal" class="fixed inset-0 z-[100] hidden flex flex-col items-center justify-center p-6 gap-6">
+      <div class="w-full max-w-md flex items-center justify-between">
+        <span class="text-xs text-white/50 font-semibold tracking-wide uppercase">Sponsored</span>
+        <div class="flex items-center gap-2">
+          <div class="ad-spinner"></div>
+        </div>
+      </div>
+
+      <!-- ── Ad slot — placeholder only. Real ad is served natively by
+           AdMob inside the app (see ADMOB_INTERSTITIAL_AD_UNIT_ID in
+           pdf-viewer.js). This box just fills the space while we wait /
+           on the plain website where AdMob doesn't run. ── -->
+      <div class="ad-slot-box" id="ad-slot-content">
+        <span class="material-symbols-outlined text-5xl opacity-30">campaign</span>
+        <div class="text-center">
+          <div class="font-bold text-sm opacity-50">Advertisement</div>
+          <div class="text-[11px] opacity-30 mt-1">Place your ad tag here</div>
+        </div>
+        <!-- YOUR AD CODE HERE -->
+      </div>
+      <!-- ── Ad slot ends ── -->
+
+      <p class="text-xs text-white/50 text-center max-w-xs">
+        Ad loading, please wait — your download will start automatically.
+      </p>
+    </div>
+
+    <!-- ══ Report Modal ══ -->
+    <div id="report-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-md w-full p-6 space-y-4 border border-gray-100 dark:border-gray-800 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+          <h3 class="text-base font-bold text-gray-900 dark:text-white font-headline flex items-center gap-2">
+            <span class="material-symbols-outlined text-rose-600">flag</span> Report Academic Sheet
+          </h3>
+          <button id="close-report-modal-btn" class="p-1.5 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800">
+            <span class="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+        <form id="report-note-form" class="space-y-4">
+          <input type="hidden" id="report-note-id" />
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Document Title</label>
+            <input type="text" id="report-note-title" readonly class="w-full px-3.5 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs text-gray-500 cursor-not-allowed" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Reason *</label>
+            <select id="report-reason-select" required class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-rose-500 focus:outline-none">
+              <option value="Incorrect Course Material">Incorrect Course Material</option>
+              <option value="Low Quality or Unreadable Scan">Low Quality or Unreadable Scan</option>
+              <option value="Copyright or Intellectual Property Concern">Copyright or Intellectual Property Concern</option>
+              <option value="Spam or Inappropriate Content">Spam or Inappropriate Content</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Details</label>
+            <textarea id="report-desc-input" rows="3" placeholder="Provide extra details…" class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-rose-500 focus:outline-none"></textarea>
+          </div>
+          <button type="submit" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-md transition-all">Submit Report</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ══ Rating Modal ══ -->
+    <div id="rating-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-sm w-full p-6 space-y-5 border border-gray-100 dark:border-gray-800 shadow-2xl text-center">
+        <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-500 flex items-center justify-center mx-auto">
+          <span class="material-symbols-outlined text-2xl">star</span>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white font-headline">Rate This Note</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">How helpful was this academic note?</p>
+        </div>
+        <div class="flex justify-center gap-1" id="modal-star-rating">
+          <button class="star-btn" data-value="1">★</button>
+          <button class="star-btn" data-value="2">★</button>
+          <button class="star-btn" data-value="3">★</button>
+          <button class="star-btn" data-value="4">★</button>
+          <button class="star-btn" data-value="5">★</button>
+        </div>
+        <p id="rating-label" class="text-xs text-amber-500 font-bold h-4"></p>
+        <p id="rating-error" class="text-xs text-red-500 hidden"></p>
+        <div class="flex gap-3">
+          <button id="rating-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 transition-all">Cancel</button>
+          <button id="rating-submit-btn" disabled class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold transition-all">Submit Rating</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="app-footer"></div>
+
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script type="module" src="./js/pages/pdf-viewer.js"></script>
+  </body>
+</html>

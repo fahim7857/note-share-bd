@@ -1,0 +1,29 @@
+{
+  "name": "academialink-html-css-js",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port=3000 --host=0.0.0.0",
+    "build": "vite build",
+    "build:android": "npm run build && npx cap sync android",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "^8.1.0",
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/browser": "^8.0.4",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@supabase/supabase-js": "^2.111.0",
+    "@tailwindcss/vite": "^4.1.14",
+    "bcryptjs": "^3.0.3",
+    "firebase": "^12.17.1",
+    "pdfjs-dist": "^6.2.108",
+    "tailwindcss": "^4.1.14",
+    "vite": "^6.2.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.0"
+  }
+}

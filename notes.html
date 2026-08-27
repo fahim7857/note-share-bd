@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AcademiaLink | Academic Notes Repository</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script>
+      if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+      /* ── Institution type toggle ── */
+      .type-btn {
+        flex: 1;
+        padding: 9px 10px;
+        border-radius: 10px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        border: 2px solid #e5e7eb;
+        background: #f9fafb;
+        color: #6b7280;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .dark .type-btn { border-color: #374151; background: #1f2937; color: #9ca3af; }
+      .type-btn.selected { border-color: #6366f1; background: #eef2ff; color: #4f46e5; }
+      .dark .type-btn.selected { background: #312e81; color: #a5b4fc; border-color: #6366f1; }
+
+      /* ── Section show/hide ── */
+      .upload-section { display: none; }
+      .upload-section.active { display: block; animation: fadeIn 0.2s ease; }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* ── University autocomplete ── */
+      .autocomplete-wrap { position: relative; }
+      .autocomplete-list {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0; right: 0;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        max-height: 180px;
+        overflow-y: auto;
+        z-index: 200;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+        display: none;
+      }
+      .dark .autocomplete-list { background: #1f2937; border-color: #374151; }
+      .autocomplete-list.open { display: block; }
+      .autocomplete-item {
+        padding: 8px 14px;
+        font-size: 0.72rem;
+        cursor: pointer;
+        color: #374151;
+        transition: background 0.15s;
+      }
+      .dark .autocomplete-item { color: #d1d5db; }
+      .autocomplete-item:hover, .autocomplete-item.active {
+        background: #eef2ff; color: #4f46e5;
+      }
+      .dark .autocomplete-item:hover, .dark .autocomplete-item.active {
+        background: #312e81; color: #a5b4fc;
+      }
+
+      /* ── Upload progress ── */
+      .upload-progress-wrap {
+        display: none;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .upload-progress-wrap.show { display: flex; }
+      .progress-bar-track {
+        width: 100%;
+        height: 6px;
+        background: #e5e7eb;
+        border-radius: 99px;
+        overflow: hidden;
+      }
+      .dark .progress-bar-track { background: #374151; }
+      .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #6366f1, #818cf8);
+        border-radius: 99px;
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      /* ── Rating: read-only average display (shown per note card) ── */
+      .star-rating-display {
+        display: inline-flex;
+        align-items: center;
+        gap: 1px;
+        line-height: 0;
+      }
+      .star-rating-display .material-symbols-outlined {
+        font-size: 15px;
+        color: #d1d5db;
+        font-variation-settings: 'FILL' 0, 'wght' 500;
+      }
+      .dark .star-rating-display .material-symbols-outlined { color: #4b5563; }
+      .star-rating-display .material-symbols-outlined.filled {
+        color: #f59e0b;
+        font-variation-settings: 'FILL' 1, 'wght' 500;
+      }
+
+      /* ── Rating: interactive "your rating" stars ── */
+      .star-rate-widget {
+        display: inline-flex;
+        align-items: center;
+        gap: 1px;
+        line-height: 0;
+      }
+      .star-rate-widget .rate-star {
+        font-size: 17px;
+        color: #d1d5db;
+        cursor: pointer;
+        transition: color 0.15s, transform 0.1s;
+        font-variation-settings: 'FILL' 0, 'wght' 500;
+      }
+      .dark .star-rate-widget .rate-star { color: #4b5563; }
+      .star-rate-widget .rate-star:hover,
+      .star-rate-widget .rate-star.hovered {
+        color: #f59e0b;
+        transform: scale(1.15);
+        font-variation-settings: 'FILL' 1, 'wght' 500;
+      }
+      .star-rate-widget .rate-star.active {
+        color: #f59e0b;
+        font-variation-settings: 'FILL' 1, 'wght' 500;
+      }
+    </style>
+  </head>
+
+  <body class="bg-[#f9f9ff] dark:bg-[#0b0f19] text-[#151c27] dark:text-[#f3f4f6] font-sans antialiased min-h-screen flex flex-col">
+    <!-- Header -->
+    <div id="app-header"></div>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+      <!-- Title & Upload Trigger -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white font-headline">Academic Note Repository</h1>
+          <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Browse lecture sheets, exam solutions, and study materials shared by students.
+          </p>
+        </div>
+        <button id="open-upload-modal-btn" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all shrink-0">
+          <span class="material-symbols-outlined text-lg">upload_file</span>
+          <span>Upload Note</span>
+        </button>
+      </div>
+
+      <!-- Filters Toolbar -->
+      <div class="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          <!-- Search -->
+          <div class="relative sm:col-span-2">
+            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+            <input type="text" id="notes-search-input"
+              placeholder="Search by title, course, subject or tags..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-gray-100 dark:border-gray-700" />
+          </div>
+
+          <!-- Institution type filter -->
+          <div>
+            <select id="notes-type-filter" class="w-full py-2.5 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-gray-100 dark:border-gray-700">
+              <option value="">All (University + School)</option>
+              <option value="university">University Only</option>
+              <option value="school_college">School / College Only</option>
+            </select>
+          </div>
+
+          <!-- Category Filter -->
+          <div>
+            <select id="notes-category-filter" class="w-full py-2.5 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-gray-100 dark:border-gray-700">
+              <option value="">All Categories</option>
+              <option value="Lecture Notes">Lecture Notes</option>
+              <option value="Lab Reports">Lab Reports</option>
+              <option value="Exam Solutions">Exam Solutions</option>
+              <option value="Handouts">Handouts</option>
+              <option value="Reference Books">Reference Books</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes Grid -->
+      <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered via notes.js -->
+      </div>
+    </main>
+
+    <!-- ══════════════════════════════════════════════
+         Modal: Upload Note
+    ══════════════════════════════════════════════ -->
+    <div id="upload-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-lg w-full p-6 space-y-5 border border-gray-100 dark:border-gray-800 shadow-2xl relative max-h-[92vh] overflow-y-auto">
+
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white font-headline flex items-center gap-2">
+            <span class="material-symbols-outlined text-indigo-600">upload_file</span>
+            <span>Upload Academic Note</span>
+          </h3>
+          <button id="close-upload-modal-btn" class="p-1.5 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800">
+            <span class="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+
+        <form id="upload-note-form" class="space-y-4" novalidate>
+
+          <!-- Document Title -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Document Title *</label>
+            <input type="text" id="note-title-input" required
+              placeholder="e.g. Algorithms Lecture Handout Week 4"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+
+          <!-- Institution Type Toggle -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">Note is for *</label>
+            <div class="flex gap-3">
+              <button type="button" class="type-btn" id="upload-btn-university" data-type="university">
+                <span class="material-symbols-outlined text-base">school</span>
+                University
+              </button>
+              <button type="button" class="type-btn" id="upload-btn-school" data-type="school_college">
+                <span class="material-symbols-outlined text-base">menu_book</span>
+                School / College
+              </button>
+            </div>
+            <input type="hidden" id="upload-institution-type" value="" />
+          </div>
+
+          <!-- ── UNIVERSITY FIELDS ── -->
+          <div class="upload-section space-y-4" id="upload-section-university">
+
+            <!-- University Autocomplete -->
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">University Name *</label>
+              <div class="autocomplete-wrap">
+                <input type="text" id="note-univ-input" autocomplete="off"
+                  placeholder="Type your university name…"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+                <div class="autocomplete-list" id="upload-univ-dropdown"></div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Course Code *</label>
+                <input type="text" id="note-code-input"
+                  placeholder="e.g. CSE-204"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Department *</label>
+                <input type="text" id="note-dept-input"
+                  placeholder="e.g. Computer Science"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Category</label>
+              <select id="note-cat-input"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <option value="Lecture Notes">Lecture Notes</option>
+                <option value="Lab Reports">Lab Reports</option>
+                <option value="Exam Solutions">Exam Solutions</option>
+                <option value="Handouts">Handouts</option>
+                <option value="Reference Books">Reference Books</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- ── SCHOOL / COLLEGE FIELDS ── -->
+          <div class="upload-section space-y-4" id="upload-section-school">
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">School / College Name *</label>
+              <input type="text" id="note-school-name-input"
+                placeholder="e.g. Dhaka College"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Class *</label>
+                <select id="note-class-input"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  <option value="">Select class…</option>
+                  <optgroup label="Secondary">
+                    <option value="Class 6">Class 6</option>
+                    <option value="Class 7">Class 7</option>
+                    <option value="Class 8">Class 8</option>
+                    <option value="Class 9">Class 9</option>
+                    <option value="Class 10">Class 10 (SSC)</option>
+                  </optgroup>
+                  <optgroup label="Higher Secondary">
+                    <option value="HSC 1st Year">HSC 1st Year</option>
+                    <option value="HSC 2nd Year">HSC 2nd Year</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Subject *</label>
+                <input type="text" id="note-subject-input"
+                  placeholder="e.g. Physics"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Chapter / Topic</label>
+              <input type="text" id="note-chapter-input"
+                placeholder="e.g. Chapter 3 — Newton's Laws of Motion"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- Tags & Description — both types -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Tags (comma separated)</label>
+            <input type="text" id="note-tags-input"
+              placeholder="e.g. Midterm, Graph Theory, Final Notes"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Description / Overview</label>
+            <textarea id="note-desc-input" rows="2"
+              placeholder="Explain what topics this note covers..."
+              class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+          </div>
+
+          <!-- PDF Upload -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Upload PDF File *</label>
+            <div class="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-400 transition-colors" id="pdf-drop-zone">
+              <span class="material-symbols-outlined text-3xl text-gray-300 dark:text-gray-600 block mb-1">picture_as_pdf</span>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Click to select or drag & drop PDF</p>
+              <p class="text-[10px] text-gray-400 mt-0.5">Max size: 20 MB · PDF only</p>
+              <input type="file" id="note-pdf-file" accept=".pdf" class="hidden" />
+            </div>
+            <p id="selected-file-name" class="text-[11px] text-indigo-600 dark:text-indigo-400 mt-1.5 hidden"></p>
+          </div>
+
+          <!-- Upload progress -->
+          <div class="upload-progress-wrap" id="upload-progress-wrap">
+            <div class="flex justify-between text-[11px] text-gray-500 dark:text-gray-400">
+              <span>Uploading to Firebase…</span>
+              <span id="progress-pct">0%</span>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="progress-bar-fill"></div>
+            </div>
+          </div>
+
+          <!-- Error -->
+          <p id="upload-form-error" class="text-xs text-red-500 hidden"></p>
+
+          <!-- Submit -->
+          <button type="submit" id="upload-submit-btn"
+            class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl text-xs shadow-md transition-all">
+            Publish Academic Note
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         Modal: Report Note
+    ══════════════════════════════════════════════ -->
+    <div id="report-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-md w-full p-6 space-y-4 border border-gray-100 dark:border-gray-800 shadow-2xl relative">
+        <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+          <h3 class="text-base font-bold text-gray-900 dark:text-white font-headline flex items-center gap-2">
+            <span class="material-symbols-outlined text-rose-600">flag</span>
+            <span>Report Academic Sheet</span>
+          </h3>
+          <button id="close-report-modal-btn" class="p-1.5 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800">
+            <span class="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+
+        <form id="report-note-form" class="space-y-4">
+          <input type="hidden" id="report-note-id" />
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Note Title</label>
+            <input type="text" id="report-note-title" readonly
+              class="w-full px-3.5 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs text-gray-500 cursor-not-allowed" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Reason for Flagging *</label>
+            <select id="report-reason-select" required
+              class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
+              <option value="wrong_file">Incorrect Course Material</option>
+              <option value="other">Low Quality or Unreadable Scan</option>
+              <option value="plagiarism">Copyright or Intellectual Property Concern</option>
+              <option value="spam">Spam or Inappropriate Content</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Detailed Explanation</label>
+            <textarea id="report-desc-input" rows="3"
+              placeholder="Provide extra details for moderators..."
+              class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:outline-none"></textarea>
+          </div>
+          <button type="submit"
+            class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-md transition-all">
+            Submit Report to Moderators
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div id="app-footer"></div>
+
+    <script type="module" src="./js/pages/notes.js"></script>
+  </body>
+</html>
