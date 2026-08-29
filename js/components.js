@@ -37,6 +37,13 @@ export function renderHeader(activePage = 'home') {
             }">
               Academic Notes
             </a>
+            <a href="./admission-checker.html" class="px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activePage === 'admission-checker'
+                ? 'bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                : 'text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
+            }">
+              Admission Checker
+            </a>
 
             ${
               user && user.isStaff
@@ -133,6 +140,10 @@ export function renderHeader(activePage = 'home') {
         <a href="./notes.html" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold ${activePage === 'notes' ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}">
           <span class="material-symbols-outlined text-base">description</span>
           <span>Notes</span>
+        </a>
+        <a href="./admission-checker.html" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold ${activePage === 'admission-checker' ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}">
+          <span class="material-symbols-outlined text-base">fact_check</span>
+          <span>Admission</span>
         </a>
         ${
           user && user.isStaff

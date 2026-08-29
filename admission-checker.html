@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7240284839832576"
+     crossorigin="anonymous"></script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- Primary Meta Tags -->
+<title>University Admission Eligibility Checker | Bangladesh Public University Admission Tool</title>
+<meta name="title" content="University Admission Eligibility Checker | Bangladesh Public University Admission Tool">
+<meta name="description" content="Free tool to instantly check your eligibility for Bangladesh public university admissions. Enter your SSC & HSC results to evaluate your status with our real-time logic engine.">
+<meta name="keywords" content="Bangladesh university admission, admission eligibility checker, public university admission, SSC HSC result checker, university admission status">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Language/Region hint -->
+<meta http-equiv="content-language" content="en-us">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "secondary": "#22C55E","on-surface-variant": "#667085","on-tertiary": "#ffffff",
+          "outline": "#98A2B3","primary": "#5541F5","tertiary-fixed": "#FDE7C7",
+          "secondary-fixed": "#BBF7D0","on-secondary": "#ffffff","secondary-container": "#DCFCE7",
+          "primary-fixed": "#C7C9FF","surface-container-lowest": "#ffffff","surface-container": "#F8F9FB",
+          "on-primary-fixed": "#241C6B","on-primary-fixed-variant": "#3E2FC2","on-background": "#0A1024",
+          "surface-tint": "#5541F5","inverse-surface": "#171B65","secondary-fixed-dim": "#4ADE80",
+          "on-error": "#ffffff","surface-container-high": "#EEF0FF","surface-container-highest": "#E6E8F0",
+          "on-secondary-fixed": "#052e16","on-primary-container": "#5541F5","on-tertiary-container": "#92400E",
+          "on-tertiary-fixed": "#7C2D12","primary-container": "#EEF0FF","on-secondary-fixed-variant": "#166534",
+          "tertiary-fixed-dim": "#FBBF24","inverse-on-surface": "#F0F0FF","background": "#E4E5EF",
+          "tertiary-container": "#FFF3DC","surface-dim": "#D9D9DF","surface-variant": "#E6E8F0",
+          "on-primary": "#ffffff","error-container": "#FFE1E7","surface-container-low": "#F8F9FB",
+          "surface": "#ffffff","on-tertiary-fixed-variant": "#B45309","surface-bright": "#ffffff",
+          "error": "#FF4D6D","primary-fixed-dim": "#6557FF","outline-variant": "#E6E8F0",
+          "on-surface": "#0A1024","tertiary": "#FF9D00","on-secondary-container": "#166534",
+          "inverse-primary": "#C7C9FF","on-error-container": "#7A0019"
+        },
+        fontFamily:{
+          "body-md":["Poppins"],"label-caps":["Poppins"],
+          "headline-lg":["Poppins"],"display-lg":["Poppins"]
+        },
+        fontSize:{
+          "body-md":["16px",{lineHeight:"1.6",fontWeight:"400"}],
+          "label-caps":["12px",{lineHeight:"1.0",letterSpacing:"0.1em",fontWeight:"500"}],
+          "headline-lg":["32px",{lineHeight:"1.2",letterSpacing:"-0.01em",fontWeight:"600"}],
+          "display-lg":["48px",{lineHeight:"1.1",letterSpacing:"-0.02em",fontWeight:"700"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  /* ── Base ─────────────────────────────────────────────── */
+  body {
+    background: linear-gradient(135deg, #6965BA 0%, #A7A8D0 50%, #E4E5EF 100%) !important;
+    background-attachment: fixed;
+  }
+  .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .glass-card { background:rgba(255,255,255,0.88); backdrop-filter:blur(20px); border:1px solid rgba(10,12,16,0.08); box-shadow:inset 0 1px 0 rgba(255,255,255,0.7); }
+
+  /* ── Form inputs ─────────────────────────────────────── */
+  .form-input, .form-select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #E6E8F0;
+    border-radius: 14px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    background: #F8F9FB;
+    color: #0A1024;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .form-input:focus, .form-select:focus {
+    border-color: #5541F5;
+    box-shadow: 0 0 0 3px rgba(85,65,245,0.12);
+    background: #fff;
+  }
+  .form-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #667085;
+    margin-bottom: 6px;
+  }
+  .form-group { margin-bottom: 0; }
+
+  /* ── Conditional section ─────────────────────────────── */
+  .conditional-section {
+    border: 1.5px dashed rgba(85,65,245,0.25);
+    border-radius: 16px;
+    padding: 20px;
+    background: rgba(85,65,245,0.03);
+  }
+  .conditional-section.hidden { display: none !important; }
+
+  /* ── Subject grid ────────────────────────────────────── */
+  .subject-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  /* ── Submit button ───────────────────────────────────── */
+  .btn-submit {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 32px;
+    background: #5541F5; color: #fff;
+    border: none; border-radius: 17px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px; font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 8px 24px rgba(85,65,245,0.22);
+  }
+  .btn-submit:hover { background: #4935D9; transform: translateY(-1px); box-shadow: 0 12px 28px rgba(85,65,245,0.30); }
+  .btn-submit:active { transform: scale(0.98); }
+
+  /* ── Info banner ─────────────────────────────────────── */
+  .info-banner {
+    background: linear-gradient(135deg, rgba(85,65,245,0.06) 0%, rgba(101,87,255,0.04) 100%);
+    border: 1px solid rgba(85,65,245,0.15);
+    border-left: 4px solid #5541F5;
+    border-radius: 0 14px 14px 0;
+    padding: 14px 18px;
+  }
+
+  /* ── Step badge ──────────────────────────────────────── */
+  .step-badge {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #5541F5; color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ── Scroll reveal ───────────────────────────────────── */
+  .reveal { opacity:0; transform:translateY(20px); transition:opacity 0.5s ease, transform 0.5s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-x-hidden">
+
+<!-- Site header (logo, nav, mobile 3-dot menu) — injected by components.js below -->
+<div id="app-header"></div>
+
+<main>
+
+  <!-- ═══ HERO ═══ -->
+  <section class="relative pt-16 pb-14 md:pt-20 md:pb-20 overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none opacity-[0.04]"
+         style="background-image:radial-gradient(#5541F5 0.5px,transparent 0.5px);background-size:28px 28px;"></div>
+    <div class="absolute top-0 right-0 w-[400px] h-[400px] rounded-full blur-[120px] pointer-events-none opacity-[0.06]"
+         style="background:#5541F5;"></div>
+
+    <div class="max-w-[1280px] mx-auto px-5 md:px-16 text-center">
+      <h1 class="font-display-lg text-[28px] md:text-[48px] leading-tight tracking-tight mb-4 text-white">
+        University Admission <span class="text-primary-fixed">Eligibility Checker</span>
+      </h1>
+      <p class="text-white/85 text-body-md max-w-2xl mx-auto leading-relaxed">
+        Enter your academic details to instantly evaluate your eligibility for Bangladesh public university admissions.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══ FORM SECTION ═══ -->
+  <section class="pb-28 px-5 md:px-16 max-w-[1280px] mx-auto">
+    <div class="max-w-3xl mx-auto">
+
+      <!-- Info banner -->
+      <div class="info-banner mb-8 reveal">
+        <p class="text-[14px] text-on-surface-variant leading-relaxed">
+          <strong class="text-primary">Note:</strong> This is an unofficial, informational tool. For official admission requirements, always refer to the respective university's official website and admission circular.
+        </p>
+      </div>
+
+      <!-- Form card -->
+      <div class="glass-card rounded-[28px] p-8 md:p-10 reveal">
+
+        <!-- Card header -->
+        <div class="flex items-center gap-4 mb-8 pb-6 border-b border-outline/10">
+          <div class="w-12 h-12 rounded-[20px] bg-primary-container flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-primary text-[24px]" style="font-variation-settings:'FILL' 1;">assignment_ind</span>
+          </div>
+          <div>
+            <h2 class="font-headline-lg text-[22px] text-on-surface leading-tight">Academic Information</h2>
+            <p class="text-on-surface-variant text-[13px] mt-0.5">Enter your SSC and HSC results to begin the eligibility check.</p>
+          </div>
+        </div>
+
+        <form id="eligibility_form" action="./result.html" method="GET">
+
+          <!-- Step 1: GPA -->
+          <div class="mb-7">
+            <div class="flex items-center gap-2 mb-5">
+              <span class="step-badge">1</span>
+              <h3 class="font-headline-lg text-[17px] text-on-surface">Examination Results</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div class="form-group">
+                <label class="form-label" for="ssc_gpa">SSC GPA (out of 5.00)</label>
+                <input class="form-input" id="ssc_gpa" name="ssc_gpa"
+                       type="number" step="0.01" min="0" max="5"
+                       placeholder="e.g. 4.75" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="hsc_gpa">HSC GPA (out of 5.00)</label>
+                <input class="form-input" id="hsc_gpa" name="hsc_gpa"
+                       type="number" step="0.01" min="0" max="5"
+                       placeholder="e.g. 4.50" required />
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Year & Group -->
+          <div class="mb-7">
+            <div class="flex items-center gap-2 mb-5">
+              <span class="step-badge">2</span>
+              <h3 class="font-headline-lg text-[17px] text-on-surface">HSC Details</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div class="form-group">
+                <label class="form-label" for="hsc_passing_year">HSC Passing Year</label>
+                <select class="form-select" id="hsc_passing_year" name="hsc_passing_year" required>
+                  <option value="">-- Select Year --</option>
+                  <option value="2026">2026</option>
+                  <option value="2025">2025</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="hsc_group">HSC Academic Group</label>
+                <select class="form-select" id="hsc_group" name="hsc_group" required>
+                  <option value="">-- Select Group --</option>
+                  <option value="Science">Science</option>
+                  <option value="Business Studies">Business Studies</option>
+                  <option value="Humanities">Humanities</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Subject GPA (conditional) -->
+          <div id="subject_gpa_container" class="conditional-section hidden mb-7">
+            <div class="flex items-center gap-2 mb-5">
+              <span class="step-badge">3</span>
+              <h3 class="font-headline-lg text-[17px] text-on-surface">Subject-wise GPA (HSC)</h3>
+            </div>
+            <div id="dynamic_subject_fields" class="subject-grid"></div>
+          </div>
+
+          <!-- Step 4: Unit Type (conditional — Science only) -->
+          <div id="unit_type_container" class="conditional-section hidden mb-7">
+            <div class="flex items-center gap-2 mb-5">
+              <span class="step-badge">4</span>
+              <h3 class="font-headline-lg text-[17px] text-on-surface">Preferred Admission Unit</h3>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="unit_type">Select your target admission category</label>
+              <select class="form-select" id="unit_type" name="unit_type">
+                <option value="University">General University Unit (A / B / C etc.)</option>
+                <option value="Engineering">Engineering University (BUET, RUET, KUET, CUET)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Hidden GPA fields -->
+          <input type="hidden" id="phy_gpa_hidden"  name="phy_gpa"  value="0.00"/>
+          <input type="hidden" id="chem_gpa_hidden" name="chem_gpa" value="0.00"/>
+          <input type="hidden" id="math_gpa_hidden" name="math_gpa" value="0.00"/>
+          <input type="hidden" id="bio_gpa_hidden"  name="bio_gpa"  value="0.00"/>
+          <input type="hidden" id="eng_gpa_hidden"  name="eng_gpa"  value="0.00"/>
+
+          <!-- Submit -->
+          <div class="pt-4 border-t border-outline/10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <button class="btn-submit" type="submit">
+              <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1;">verified</span>
+              Check Eligibility
+            </button>
+            <p class="text-on-surface-variant text-[13px] leading-relaxed">
+              Results will show your eligibility based on standard public university admission criteria for Bangladesh.
+            </p>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Feature highlight cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-8 reveal">
+        <div class="glass-card rounded-[20px] p-5 text-center">
+          <span class="material-symbols-outlined text-primary text-[28px] mb-3 block" style="font-variation-settings:'FILL' 1;">bolt</span>
+          <div class="font-headline-lg text-[15px] text-on-surface mb-1">Instant Results</div>
+          <p class="text-on-surface-variant text-[13px]">Real-time eligibility evaluation with zero server delay.</p>
+        </div>
+        <div class="glass-card rounded-[20px] p-5 text-center">
+          <span class="material-symbols-outlined text-primary text-[28px] mb-3 block" style="font-variation-settings:'FILL' 1;">account_tree</span>
+          <div class="font-headline-lg text-[15px] text-on-surface mb-1">Smart Logic Engine</div>
+          <p class="text-on-surface-variant text-[13px]">Conditional fields adapt dynamically to your academic group.</p>
+        </div>
+        <div class="glass-card rounded-[20px] p-5 text-center">
+          <span class="material-symbols-outlined text-primary text-[28px] mb-3 block" style="font-variation-settings:'FILL' 1;">lock</span>
+          <div class="font-headline-lg text-[15px] text-on-surface mb-1">Secure & Private</div>
+          <p class="text-on-surface-variant text-[13px]">No data is stored. Your results are processed client-side only.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- Site footer — injected by components.js below -->
+<div id="app-footer"></div>
+
+<!-- ═══════════════ JAVASCRIPT (eligibility logic preserved) ═══════════════ -->
+<script>
+  /* ── Scroll reveal ── */
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  /* ════════════════════════════════════════════
+     ELIGIBILITY FORM LOGIC (unchanged from original)
+     ════════════════════════════════════════════ */
+  const groupSelect       = document.getElementById('hsc_group');
+  const unitTypeSelect    = document.getElementById('unit_type');
+  const unitTypeContainer = document.getElementById('unit_type_container');
+  const subjectGpaContainer   = document.getElementById('subject_gpa_container');
+  const dynamicSubjectFields  = document.getElementById('dynamic_subject_fields');
+
+  const allSubjectIds = ['phy_gpa', 'chem_gpa', 'math_gpa', 'bio_gpa', 'eng_gpa'];
+
+  const gpaOptionsHtml = `
+    <option value="">-- Select --</option>
+    <option value="5.00">5.00 &nbsp; (A+)</option>
+    <option value="4.00">4.00 &nbsp; (A)</option>
+    <option value="3.50">3.50 &nbsp; (A-)</option>
+    <option value="3.00">3.00 &nbsp; (B)</option>
+    <option value="2.00">2.00 &nbsp; (C)</option>
+    <option value="1.00">1.00 &nbsp; (D)</option>
+    <option value="0.00">0.00 &nbsp; (F)</option>
+  `;
+
+  function generateSubjectFields(group) {
+    let requiredSubjects = [];
+
+    if (group === 'Science') {
+      requiredSubjects = [
+        { label: 'Physics',       id: 'phy_gpa',  name: 'phy_gpa'  },
+        { label: 'Chemistry',     id: 'chem_gpa', name: 'chem_gpa' },
+        { label: 'Higher Math',   id: 'math_gpa', name: 'math_gpa' },
+        { label: 'Biology',       id: 'bio_gpa',  name: 'bio_gpa'  },
+        { label: 'English',       id: 'eng_gpa',  name: 'eng_gpa'  },
+      ];
+    } else if (group === 'Business Studies' || group === 'Humanities') {
+      requiredSubjects = [
+        { label: 'English', id: 'eng_gpa', name: 'eng_gpa' },
+      ];
+    } else {
+      return '';
+    }
+
+    return requiredSubjects.map(subject => `
+      <div class="form-group">
+        <label class="form-label" for="${subject.id}">${subject.label}</label>
+        <select class="form-select" id="${subject.id}" name="${subject.name}" required>
+          ${gpaOptionsHtml}
+        </select>
+      </div>
+    `).join('');
+  }
+
+  function resetHiddenGpas() {
+    allSubjectIds.forEach(id => {
+      const h = document.getElementById(id + '_hidden');
+      if (h) h.value = '0.00';
+    });
+  }
+
+  function updateConditionalFields() {
+    const group = groupSelect.value;
+
+    // Save existing values
+    const currentGpaValues = {};
+    allSubjectIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) currentGpaValues[id] = el.value;
+    });
+
+    // Unit type — Science only
+    if (group === 'Science') {
+      unitTypeContainer.classList.remove('hidden');
+    } else {
+      unitTypeContainer.classList.add('hidden');
+      unitTypeSelect.value = 'University';
+    }
+
+    // Subject GPA fields
+    if (group !== '') {
+      subjectGpaContainer.classList.remove('hidden');
+      dynamicSubjectFields.innerHTML = generateSubjectFields(group);
+
+      document.querySelectorAll('#dynamic_subject_fields select').forEach(select => {
+        const id = select.id;
+        if (currentGpaValues[id] && currentGpaValues[id] !== '') {
+          select.value = currentGpaValues[id];
+        }
+        select.addEventListener('change', updateHiddenFields);
+        updateHiddenFields({ target: select });
+      });
+    } else {
+      subjectGpaContainer.classList.add('hidden');
+      dynamicSubjectFields.innerHTML = '';
+    }
+
+    resetHiddenGpas();
+    document.querySelectorAll('#dynamic_subject_fields select').forEach(select => {
+      if (select.value !== '') updateHiddenFields({ target: select });
+    });
+  }
+
+  function updateHiddenFields(event) {
+    const select = event.target;
+    const hidden = document.getElementById(select.id + '_hidden');
+    if (hidden) hidden.value = select.value || '0.00';
+  }
+
+  groupSelect.addEventListener('change', updateConditionalFields);
+  unitTypeSelect.addEventListener('change', updateConditionalFields);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateConditionalFields();
+  });
+</script>
+
+<!-- Mounts the shared site header (logo/nav/mobile 3-dot menu) and footer -->
+<script type="module">
+  import { renderHeader, renderFooter, setupHeaderEvents } from './js/components.js';
+  document.getElementById('app-header').innerHTML = renderHeader('admission');
+  document.getElementById('app-footer').innerHTML = renderFooter();
+  setupHeaderEvents();
+</script>
+</body>
+</html>
