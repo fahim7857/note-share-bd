@@ -11,49 +11,25 @@
 <meta name="description" content="Free tool to instantly check your eligibility for Bangladesh public university admissions. Enter your SSC & HSC results to evaluate your status with our real-time logic engine.">
 <meta name="keywords" content="Bangladesh university admission, admission eligibility checker, public university admission, SSC HSC result checker, university admission status">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+ 
 <!-- Language/Region hint -->
 <meta http-equiv="content-language" content="en-us">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+ 
+<!-- Same pre-built stylesheet (Tailwind v4 build + self-hosted fonts) every
+     other page uses — replaces the old runtime CDN + inline config below,
+     which depended on cdn.tailwindcss.com and fonts.googleapis.com being
+     reachable at runtime (not guaranteed inside the Capacitor WebView). -->
+<link rel="stylesheet" href="./css/style.css" />
+ 
+<!-- Anti-flash theme script — matches every other page, runs before paint -->
 <script>
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "secondary": "#22C55E","on-surface-variant": "#667085","on-tertiary": "#ffffff",
-          "outline": "#98A2B3","primary": "#5541F5","tertiary-fixed": "#FDE7C7",
-          "secondary-fixed": "#BBF7D0","on-secondary": "#ffffff","secondary-container": "#DCFCE7",
-          "primary-fixed": "#C7C9FF","surface-container-lowest": "#ffffff","surface-container": "#F8F9FB",
-          "on-primary-fixed": "#241C6B","on-primary-fixed-variant": "#3E2FC2","on-background": "#0A1024",
-          "surface-tint": "#5541F5","inverse-surface": "#171B65","secondary-fixed-dim": "#4ADE80",
-          "on-error": "#ffffff","surface-container-high": "#EEF0FF","surface-container-highest": "#E6E8F0",
-          "on-secondary-fixed": "#052e16","on-primary-container": "#5541F5","on-tertiary-container": "#92400E",
-          "on-tertiary-fixed": "#7C2D12","primary-container": "#EEF0FF","on-secondary-fixed-variant": "#166534",
-          "tertiary-fixed-dim": "#FBBF24","inverse-on-surface": "#F0F0FF","background": "#E4E5EF",
-          "tertiary-container": "#FFF3DC","surface-dim": "#D9D9DF","surface-variant": "#E6E8F0",
-          "on-primary": "#ffffff","error-container": "#FFE1E7","surface-container-low": "#F8F9FB",
-          "surface": "#ffffff","on-tertiary-fixed-variant": "#B45309","surface-bright": "#ffffff",
-          "error": "#FF4D6D","primary-fixed-dim": "#6557FF","outline-variant": "#E6E8F0",
-          "on-surface": "#0A1024","tertiary": "#FF9D00","on-secondary-container": "#166534",
-          "inverse-primary": "#C7C9FF","on-error-container": "#7A0019"
-        },
-        fontFamily:{
-          "body-md":["Poppins"],"label-caps":["Poppins"],
-          "headline-lg":["Poppins"],"display-lg":["Poppins"]
-        },
-        fontSize:{
-          "body-md":["16px",{lineHeight:"1.6",fontWeight:"400"}],
-          "label-caps":["12px",{lineHeight:"1.0",letterSpacing:"0.1em",fontWeight:"500"}],
-          "headline-lg":["32px",{lineHeight:"1.2",letterSpacing:"-0.01em",fontWeight:"600"}],
-          "display-lg":["48px",{lineHeight:"1.1",letterSpacing:"-0.02em",fontWeight:"700"}]
-        }
-      }
-    }
+  if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
   }
 </script>
+ 
 <style>
   /* ── Base ─────────────────────────────────────────────── */
   body {
@@ -62,7 +38,7 @@
   }
   .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
   .glass-card { background:rgba(255,255,255,0.88); backdrop-filter:blur(20px); border:1px solid rgba(10,12,16,0.08); box-shadow:inset 0 1px 0 rgba(255,255,255,0.7); }
-
+ 
   /* ── Form inputs ─────────────────────────────────────── */
   .form-input, .form-select {
     width: 100%;
@@ -101,7 +77,7 @@
     margin-bottom: 6px;
   }
   .form-group { margin-bottom: 0; }
-
+ 
   /* ── Conditional section ─────────────────────────────── */
   .conditional-section {
     border: 1.5px dashed rgba(85,65,245,0.25);
@@ -110,14 +86,14 @@
     background: rgba(85,65,245,0.03);
   }
   .conditional-section.hidden { display: none !important; }
-
+ 
   /* ── Subject grid ────────────────────────────────────── */
   .subject-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 16px;
   }
-
+ 
   /* ── Submit button ───────────────────────────────────── */
   .btn-submit {
     display: inline-flex; align-items: center; gap: 8px;
@@ -133,7 +109,7 @@
   }
   .btn-submit:hover { background: #4935D9; transform: translateY(-1px); box-shadow: 0 12px 28px rgba(85,65,245,0.30); }
   .btn-submit:active { transform: scale(0.98); }
-
+ 
   /* ── Info banner ─────────────────────────────────────── */
   .info-banner {
     background: linear-gradient(135deg, rgba(85,65,245,0.06) 0%, rgba(101,87,255,0.04) 100%);
@@ -142,7 +118,7 @@
     border-radius: 0 14px 14px 0;
     padding: 14px 18px;
   }
-
+ 
   /* ── Step badge ──────────────────────────────────────── */
   .step-badge {
     width: 28px; height: 28px; border-radius: 50%;
@@ -152,7 +128,7 @@
     font-size: 12px; font-weight: 700;
     flex-shrink: 0;
   }
-
+ 
   /* ── Scroll reveal ───────────────────────────────────── */
   .reveal { opacity:0; transform:translateY(20px); transition:opacity 0.5s ease, transform 0.5s ease; }
   .reveal.visible { opacity:1; transform:translateY(0); }

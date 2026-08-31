@@ -96,3 +96,40 @@ export async function loadAd(kind, containerEl) {
   //   (window.adsbygoogle = window.adsbygoogle || []).push({});
   void containerEl;
 }
+
+// ── 5. Hardware back button (Android) ────────────────────────────────────
+// WEB: no-op — browsers already handle their own back button.
+// CAPACITOR: by default, Capacitor exits the app the instant the Android
+//      back button is pressed if there's no in-page JS history — on this
+//      multi-page (separate .html per page) site that means the app closes
+//      almost immediately instead of going to the previous page. Attaching
+//      a 'backButton' listener disables that default-exit behaviour, so we
+//      have to reimplement it ourselves: go back in the WebView's history
+//      when possible, otherwise actually exit.
+//
+//      Uses window.Capacitor.Plugins.App directly (no @capacitor/app
+//      import needed — the App plugin is already registered natively by
+//      the Android platform). If window.Capacitor.Plugins.App is undefined,
+//      run `npm i @capacitor/app && npx cap sync android` once.
+//
+// Call this once, as early as possible, from a script that loads on every
+// page (e.g. a small shared bootstrap `<script type="module">`, or add
+// `import './lib/native.js'; initBackButton();` to the top of each
+// js/pages/*.js file).
+export function initBackButton() {
+  if (!isCapacitor()) return;
+
+  const App = window.Capacitor?.Plugins?.App;
+  if (!App) {
+    console.warn('[native.js] Capacitor App plugin not found — run: npm i @capacitor/app && npx cap sync android');
+    return;
+  }
+
+  App.addListener('backButton', ({ canGoBack }) => {
+    if (canGoBack) {
+      window.history.back();
+    } else {
+      App.exitApp();
+    }
+  });
+}

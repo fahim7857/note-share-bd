@@ -5,6 +5,83 @@ html, body {
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================
+   THEME TOKENS — custom color/font names used by
+   admission-checker.html and result.html (the "eligibility
+   checker" tool). Moved here from a per-page Tailwind CDN
+   config so these two pages can drop the runtime CDN script
+   and use this one pre-built stylesheet like every other page.
+   ============================================================ */
+@theme {
+  --color-secondary: #22C55E;
+  --color-on-surface-variant: #667085;
+  --color-on-tertiary: #ffffff;
+  --color-outline: #98A2B3;
+  --color-primary: #5541F5;
+  --color-tertiary-fixed: #FDE7C7;
+  --color-secondary-fixed: #BBF7D0;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #DCFCE7;
+  --color-primary-fixed: #C7C9FF;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container: #F8F9FB;
+  --color-on-primary-fixed: #241C6B;
+  --color-on-primary-fixed-variant: #3E2FC2;
+  --color-on-background: #0A1024;
+  --color-surface-tint: #5541F5;
+  --color-inverse-surface: #171B65;
+  --color-secondary-fixed-dim: #4ADE80;
+  --color-on-error: #ffffff;
+  --color-surface-container-high: #EEF0FF;
+  --color-surface-container-highest: #E6E8F0;
+  --color-on-secondary-fixed: #052e16;
+  --color-on-primary-container: #5541F5;
+  --color-on-tertiary-container: #92400E;
+  --color-on-tertiary-fixed: #7C2D12;
+  --color-primary-container: #EEF0FF;
+  --color-on-secondary-fixed-variant: #166534;
+  --color-tertiary-fixed-dim: #FBBF24;
+  --color-inverse-on-surface: #F0F0FF;
+  --color-background: #E4E5EF;
+  --color-tertiary-container: #FFF3DC;
+  --color-surface-dim: #D9D9DF;
+  --color-surface-variant: #E6E8F0;
+  --color-on-primary: #ffffff;
+  --color-error-container: #FFE1E7;
+  --color-surface-container-low: #F8F9FB;
+  --color-surface: #ffffff;
+  --color-on-tertiary-fixed-variant: #B45309;
+  --color-surface-bright: #ffffff;
+  --color-error: #FF4D6D;
+  --color-primary-fixed-dim: #6557FF;
+  --color-outline-variant: #E6E8F0;
+  --color-on-surface: #0A1024;
+  --color-tertiary: #FF9D00;
+  --color-on-secondary-container: #166534;
+  --color-inverse-primary: #C7C9FF;
+
+  --font-body-md: 'Poppins', system-ui, sans-serif;
+  --font-label-caps: 'Poppins', system-ui, sans-serif;
+  --font-headline-lg: 'Poppins', system-ui, sans-serif;
+  --font-display-lg: 'Poppins', system-ui, sans-serif;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 1.6;
+  --text-body-md--font-weight: 400;
+  --text-label-caps: 12px;
+  --text-label-caps--line-height: 1.0;
+  --text-label-caps--letter-spacing: 0.1em;
+  --text-label-caps--font-weight: 500;
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 1.2;
+  --text-headline-lg--letter-spacing: -0.01em;
+  --text-headline-lg--font-weight: 600;
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 1.1;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 700;
+}
+
+/* ============================================================
    BASE — global element defaults, fonts, colors
    ============================================================ */
 @layer base {
