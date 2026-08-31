@@ -1,5 +1,5 @@
 {
-  "appId": "com.notely.app",
+  "appId": "com.example.notely",
   "appName": "Notely",
   "webDir": "dist"
 }
