@@ -19,7 +19,7 @@ export default defineConfig({
         privacy: path.resolve(__dirname, 'privacy-policy.html'),
         terms: path.resolve(__dirname, 'terms.html'),
         forget: path.resolve(__dirname, 'forgot-password.html'),
-        admission: path.resolve(__dirname, 'admission-checker.html'),
+        admissionchecker: path.resolve(__dirname, 'admission-checker.html'),
         result: path.resolve(__dirname, 'result.html'),
       },
     },

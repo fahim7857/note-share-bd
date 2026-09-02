@@ -38,7 +38,7 @@ export function renderHeader(activePage = 'home') {
               Academic Notes
             </a>
             <a href="./admission-checker.html" class="px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activePage === 'admission-checker'
+              activePage === 'admissionchecker'
                 ? 'bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
                 : 'text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
             }">
