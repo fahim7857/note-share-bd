@@ -64,31 +64,6 @@
       }
       .star-btn:hover, .star-btn.active { color: #f59e0b; transform: scale(1.15); }
       .star-btn.filled { color: #f59e0b; }
-
-      /* ── Full-screen Ad Modal ──
-         NOTE: no skip button anymore on purpose. The modal auto-closes
-         either when the real interstitial ad (AdMob, native app) reports
-         itself dismissed, or — if no ad could be loaded/shown (plain
-         website, or the ad failed) — after a short fixed wait. See
-         js/pages/pdf-viewer.js: handleDownloadClick(). */
-      #ad-modal {
-        background: rgba(0,0,0,0.92);
-        backdrop-filter: blur(8px);
-      }
-      .ad-spinner {
-        width: 40px; height: 40px; border-radius: 50%;
-        border: 3px solid rgba(255,255,255,0.15);
-        border-top-color: #6366f1;
-        animation: ad-spin 0.8s linear infinite;
-      }
-      @keyframes ad-spin { to { transform: rotate(360deg); } }
-      .ad-slot-box {
-        width: 100%; max-width: 420px; min-height: 220px;
-        border: 2px dashed rgba(255,255,255,0.15); border-radius: 20px;
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center; gap: 8px;
-        color: rgba(255,255,255,0.4); font-size: 0.75rem; font-weight: 600;
-      }
     </style>
   </head>
 
@@ -113,32 +88,42 @@
       <div id="pdf-viewer-content" class="space-y-5 hidden"></div>
     </main>
 
-    <!-- ══ Ad Modal (no manual skip — auto-continues) ══ -->
-    <div id="ad-modal" class="fixed inset-0 z-[100] hidden flex flex-col items-center justify-center p-6 gap-6">
-      <div class="w-full max-w-md flex items-center justify-between">
-        <span class="text-xs text-white/50 font-semibold tracking-wide uppercase">Sponsored</span>
-        <div class="flex items-center gap-2">
-          <div class="ad-spinner"></div>
+    <!-- ══ Premium Modal ══ -->
+    <div id="premium-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-sm w-full p-6 space-y-5 border border-gray-100 dark:border-gray-800 shadow-2xl text-center">
+        <div class="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-500 flex items-center justify-center mx-auto shadow-inner">
+          <span class="material-symbols-outlined text-3xl">workspace_premium</span>
+        </div>
+        <div class="space-y-1.5">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white font-headline" id="premium-modal-title">Premium Access Required</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed" id="premium-modal-desc">
+            Full document reading and PDF downloads are exclusive to Premium members. Free users can preview up to 40% of the document.
+          </p>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/50 dark:border-amber-800/50 text-left space-y-2 text-xs">
+          <div class="flex items-center gap-2 text-gray-700 dark:text-gray-200 font-semibold">
+            <span class="material-symbols-outlined text-amber-500 text-base">check_circle</span>
+            <span>Read 100% of all note pages</span>
+          </div>
+          <div class="flex items-center gap-2 text-gray-700 dark:text-gray-200 font-semibold">
+            <span class="material-symbols-outlined text-amber-500 text-base">check_circle</span>
+            <span>Download notes directly to your device</span>
+          </div>
+          <div class="flex items-center gap-2 text-gray-700 dark:text-gray-200 font-semibold">
+            <span class="material-symbols-outlined text-amber-500 text-base">check_circle</span>
+            <span>Unlimited access to all study materials</span>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button id="premium-close-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+            Cancel
+          </button>
+          <a id="premium-action-btn" href="./profile.html" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-sm">workspace_premium</span>
+            <span id="premium-action-text">Get Premium</span>
+          </a>
         </div>
       </div>
-
-      <!-- ── Ad slot — placeholder only. Real ad is served natively by
-           AdMob inside the app (see ADMOB_INTERSTITIAL_AD_UNIT_ID in
-           pdf-viewer.js). This box just fills the space while we wait /
-           on the plain website where AdMob doesn't run. ── -->
-      <div class="ad-slot-box" id="ad-slot-content">
-        <span class="material-symbols-outlined text-5xl opacity-30">campaign</span>
-        <div class="text-center">
-          <div class="font-bold text-sm opacity-50">Advertisement</div>
-          <div class="text-[11px] opacity-30 mt-1">Place your ad tag here</div>
-        </div>
-        <!-- YOUR AD CODE HERE -->
-      </div>
-      <!-- ── Ad slot ends ── -->
-
-      <p class="text-xs text-white/50 text-center max-w-xs">
-        Ad loading, please wait — your download will start automatically.
-      </p>
     </div>
 
     <!-- ══ Report Modal ══ -->

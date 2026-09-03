@@ -80,24 +80,53 @@ async function loadDashboard() {
   const [
     { data: reports },
     { data: allNotes },
-    { data: pendingNotes },
+    { data: pendingJobs },
+    { data: allJobs },
     { data: users },
     { data: profiles },
     { data: notesCount },
+    { data: jobsPerUser },
     { data: notesPerUser },
   ] = await Promise.all([
     supabase.from('reports').select('*').eq('status', 'pending').order('created_at', { ascending: false }),
     supabase.from('notes').select('id, title, course, institution_name, institution_type, class_name, is_active, download_count, avg_rating, uploaded_by_id, created_at').order('created_at', { ascending: false }),
-    supabase.from('notes').select('*').eq('is_approved', false).order('created_at', { ascending: false }),
-    supabase.from('users').select('id, email, is_staff, is_active, date_joined').order('date_joined', { ascending: false }),
+    supabase.from('jobs').select('*').eq('is_active', false).order('created_at', { ascending: false }),
+    supabase.from('jobs').select('id, posted_by_id').eq('is_active', true),
+    supabase.from('users').select('id, email, is_staff, is_active, date_joined, is_premium, premium_expires_at').order('date_joined', { ascending: false }),
     supabase.from('profiles').select('user_id, full_name, institution_name, institution_type'),
     supabase.from('notes').select('id', { count: 'exact', head: true }),
+    supabase.from('jobs').select('posted_by_id, id').eq('is_active', true),
     supabase.from('notes').select('uploaded_by_id, id'),
   ]);
+
+  // ── Auto-expire premium users whose time is up ───────────────────────────
+  // The admin can grant premium for N days from the Users tab. Rather than relying
+  // on a server-side cron to flip is_premium back to false, we check on every
+  // dashboard load: any user still marked premium whose premium_expires_at has
+  // already passed gets reverted to a normal account right here.
+  const now = new Date();
+  const usersList = users || [];
+  const justExpired = usersList.filter(
+    (u) => u.is_premium && u.premium_expires_at && new Date(u.premium_expires_at) < now
+  );
+
+  if (justExpired.length) {
+    await Promise.all(
+      justExpired.map((u) =>
+        supabase.rpc('check_and_expire_premium', { p_user_id: u.id })
+      )
+    );
+    // Reflect the change locally right away so the table below shows the
+    // correct state without needing a second round-trip/reload.
+    justExpired.forEach((u) => { u.is_premium = false; });
+  }
 
   // Build lookup maps
   const profileMap    = {};
   (profiles || []).forEach((p) => { profileMap[p.user_id] = p; });
+
+  const jobCountMap   = {};
+  (jobsPerUser || []).forEach((j) => { jobCountMap[j.posted_by_id] = (jobCountMap[j.posted_by_id] || 0) + 1; });
 
   const noteCountMap  = {};
   (notesPerUser || []).forEach((n) => { noteCountMap[n.uploaded_by_id] = (noteCountMap[n.uploaded_by_id] || 0) + 1; });
@@ -123,15 +152,16 @@ async function loadDashboard() {
   // Stats
   document.getElementById('stat-reports').textContent = (reports || []).length;
   document.getElementById('stat-notes').textContent   = (allNotes || []).length;
+  document.getElementById('stat-jobs').textContent    = (pendingJobs || []).length;
   document.getElementById('stat-users').textContent   = (users || []).length;
   document.getElementById('reports-count-badge').textContent = (reports || []).length;
-  document.getElementById('notes-pending-badge').textContent = (pendingNotes || []).length;
+  document.getElementById('jobs-pending-badge').textContent  = (pendingJobs || []).length;
 
   // Render sections
   renderReports(reports || [], noteTitleMap, reporterMap);
-  renderPendingNoteApprovals(pendingNotes || [], profileMap);
+  renderPendingJobs(pendingJobs || [], profileMap);
   renderNotes(allNotes || [], profileMap);
-  renderUsers(users || [], profileMap, noteCountMap);
+  renderUsers(usersList, profileMap, noteCountMap, jobCountMap);
 }
 
 // ── Reports ───────────────────────────────────────────────────────────────────
@@ -186,65 +216,68 @@ function renderReports(reports, noteTitleMap, reporterMap) {
   });
 }
 
-// ── Pending Note Approvals ────────────────────────────────────────────────────
-function renderPendingNoteApprovals(notes, profileMap) {
-  const container = document.getElementById('admin-note-approvals-list');
+// ── Pending Job Approvals ─────────────────────────────────────────────────────
+function renderPendingJobs(jobs, profileMap) {
+  const container = document.getElementById('admin-jobs-list');
   if (!container) return;
 
-  if (!notes.length) {
-    container.innerHTML = `<p class="text-xs text-gray-400 py-4 italic text-center">No notes waiting for approval.</p>`;
+  if (!jobs.length) {
+    container.innerHTML = `<p class="text-xs text-gray-400 py-4 italic text-center">No pending job approvals.</p>`;
     return;
   }
 
-  container.innerHTML = notes.map((n) => {
-    const uploader = profileMap[n.uploaded_by_id];
-    const name      = uploader?.full_name || `User #${n.uploaded_by_id}`;
-    const inst      = uploader?.institution_name || '—';
-    const badge     = n.institution_type === 'university' ? (n.course || '—') : (n.class_name || 'School');
-    const date      = new Date(n.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+  container.innerHTML = jobs.map((j) => {
+    const poster   = profileMap[j.posted_by_id];
+    const name     = poster?.full_name || `User #${j.posted_by_id}`;
+    const inst     = poster?.institution_name || '—';
+    const jobType  = j.job_type || 'Full-time';
+    const location = j.location || '—';
+    const date     = new Date(j.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
 
     return `
       <div class="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 p-4 space-y-3">
         <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
           <div class="space-y-1 min-w-0">
             <div class="flex flex-wrap items-center gap-2">
-              <span class="px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 text-[10px] font-bold uppercase">${badge}</span>
-              <span class="text-[10px] text-gray-400">Uploaded: ${date}</span>
+              <span class="px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 text-[10px] font-bold uppercase">${jobType}</span>
+              <span class="text-[10px] text-gray-400">Posted: ${date}</span>
             </div>
-            <h3 class="font-bold text-gray-900 dark:text-white text-sm">${n.title}</h3>
-            <p class="text-xs text-gray-500">${n.institution_name || '—'}</p>
-            <p class="text-[11px] text-indigo-500">Uploaded by: ${name} (${inst})</p>
+            <h3 class="font-bold text-gray-900 dark:text-white text-sm">${j.title}</h3>
+            <p class="text-xs text-gray-500">${j.company} · ${location}</p>
+            <p class="text-[11px] text-indigo-500">Posted by: ${name} (${inst})</p>
           </div>
           <div class="flex gap-2 flex-shrink-0">
-            <button class="approve-note-btn px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all"
-              data-id="${n.id}">
+            <button class="approve-job-btn px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all"
+              data-id="${j.id}">
               <span class="material-symbols-outlined text-sm align-middle">check</span> Approve
             </button>
-            <button class="reject-note-btn px-4 py-2 bg-rose-50 dark:bg-rose-950/50 text-rose-600 text-xs font-bold rounded-xl hover:bg-rose-100 transition-all"
-              data-id="${n.id}">
+            <button class="reject-job-btn px-4 py-2 bg-rose-50 dark:bg-rose-950/50 text-rose-600 text-xs font-bold rounded-xl hover:bg-rose-100 transition-all"
+              data-id="${j.id}">
               <span class="material-symbols-outlined text-sm align-middle">close</span> Reject
             </button>
           </div>
         </div>
-        ${n.description ? `<p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">${n.description}</p>` : ''}
+        <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">${j.description}</p>
+        <a href="${j.apply_link}" target="_blank" class="text-[11px] text-indigo-500 hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-xs">open_in_new</span>${j.apply_link}
+        </a>
       </div>`;
   }).join('');
 
   // Approve
-  container.querySelectorAll('.approve-note-btn').forEach((btn) => {
+  container.querySelectorAll('.approve-job-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      await supabase.from('notes').update({ is_approved: true }).eq('id', btn.dataset.id);
-      showToast('Note approved and published!', 'success');
+      await supabase.from('jobs').update({ is_active: true }).eq('id', btn.dataset.id);
+      showToast('Job approved and published!', 'success');
       await loadDashboard();
     });
   });
 
   // Reject (delete)
-  container.querySelectorAll('.reject-note-btn').forEach((btn) => {
+  container.querySelectorAll('.reject-job-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Reject and permanently delete this note?')) return;
-      await supabase.from('notes').delete().eq('id', btn.dataset.id);
-      showToast('Note rejected and removed.', 'info');
+      await supabase.from('jobs').delete().eq('id', btn.dataset.id);
+      showToast('Job rejected and removed.', 'info');
       await loadDashboard();
     });
   });
@@ -315,48 +348,134 @@ function renderNotes(notes, profileMap) {
 }
 
 // ── Users ─────────────────────────────────────────────────────────────────────
-function renderUsers(users, profileMap, noteCountMap) {
+function renderUsers(users, profileMap, noteCountMap, jobCountMap) {
   const tbody = document.getElementById('users-table-body');
   if (!tbody) return;
 
   if (!users.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-gray-400 italic text-xs">No registered users.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400 italic text-xs">No registered users.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = users.map((u) => {
-    const profile   = profileMap[u.id];
-    const inst      = profile?.institution_name || '—';
-    const noteCount = noteCountMap[u.id] || 0;
-    const joined    = new Date(u.date_joined).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+    const profile    = profileMap[u.id];
+    const inst       = profile?.institution_name || '—';
+    const noteCount  = noteCountMap[u.id] || 0;
+    const jobCount   = jobCountMap[u.id]  || 0;
+    const joined     = new Date(u.date_joined).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+
+    // Premium status
+    const isPremium  = u.is_premium || false;
+    const expiry     = u.premium_expires_at
+      ? new Date(u.premium_expires_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+      : null;
+    const isExpired  = u.premium_expires_at && new Date(u.premium_expires_at) < new Date();
 
     return `
-      <tr>
+      <tr class="${isExpired ? 'opacity-60' : ''}">
         <td class="py-3 px-2 text-xs">
           <div class="font-bold text-gray-900 dark:text-white">${u.email}</div>
           <div class="text-[10px] text-gray-400">Joined: ${joined}</div>
         </td>
-        <td class="py-3 px-2 text-[11px] text-gray-500 max-w-[140px] truncate">${inst}</td>
+        <td class="py-3 px-2 text-[11px] text-gray-500 max-w-[120px] truncate">${inst}</td>
         <td class="py-3 px-2 text-center">
           <span class="px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold">${noteCount}</span>
+        </td>
+        <td class="py-3 px-2 text-center">
+          <span class="px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">${jobCount}</span>
         </td>
         <td class="py-3 px-2">
           <span class="px-2 py-0.5 rounded-full ${u.is_staff ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'} text-[10px] font-bold">
             ${u.is_staff ? 'Admin' : 'Student'}
           </span>
         </td>
-        <td class="py-3 px-2 text-right space-x-2 whitespace-nowrap">
-          <button class="toggle-staff-btn text-[11px] font-bold text-indigo-600 hover:underline"
-            data-id="${u.id}" data-staff="${u.is_staff}">
-            ${u.is_staff ? 'Demote' : 'Make Admin'}
-          </button>
-          <button class="toggle-active-btn text-[11px] font-bold ${u.is_active ? 'text-rose-500 hover:underline' : 'text-emerald-600 hover:underline'}"
-            data-id="${u.id}" data-active="${u.is_active}">
-            ${u.is_active ? 'Deactivate' : 'Activate'}
-          </button>
+        <td class="py-3 px-2">
+          ${isPremium && !isExpired
+            ? `<div class="flex flex-col gap-0.5">
+                 <span class="px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 text-[10px] font-bold w-fit">⭐ Premium</span>
+                 ${expiry ? `<span class="text-[9px] text-gray-400">Expires: ${expiry}</span>` : ''}
+               </div>`
+            : isExpired
+              ? `<span class="px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/50 text-rose-500 text-[10px] font-bold">Expired</span>`
+              : `<span class="text-[10px] text-gray-400">Free</span>`
+          }
+        </td>
+        <td class="py-3 px-2 text-right whitespace-nowrap">
+          <div class="flex items-center justify-end gap-2 flex-wrap">
+            <!-- Premium toggle dropdown -->
+            <div class="relative premium-dropdown-wrap">
+              <button class="premium-toggle-btn text-[11px] font-bold px-2.5 py-1 rounded-lg
+                ${isPremium && !isExpired
+                  ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 hover:bg-rose-100'
+                  : 'bg-violet-50 dark:bg-violet-950/30 text-violet-600 hover:bg-violet-100'}"
+                data-id="${u.id}" data-premium="${isPremium && !isExpired}">
+                ${isPremium && !isExpired ? 'Remove Premium' : '⭐ Give Premium'}
+              </button>
+              <!-- Duration picker (shown on click) -->
+              <div class="premium-duration-picker hidden absolute right-0 top-8 z-30 w-44 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xl py-2 text-xs">
+                <div class="px-3 py-1.5 text-[10px] text-gray-400 font-bold uppercase tracking-wider">Select Duration</div>
+                <button class="set-premium-btn w-full text-left px-4 py-2 hover:bg-violet-50 dark:hover:bg-violet-950/50 text-gray-700 dark:text-gray-200 font-semibold" data-id="${u.id}" data-days="30">30 Days</button>
+                <button class="set-premium-btn w-full text-left px-4 py-2 hover:bg-violet-50 dark:hover:bg-violet-950/50 text-gray-700 dark:text-gray-200 font-semibold" data-id="${u.id}" data-days="60">60 Days</button>
+                <button class="set-premium-btn w-full text-left px-4 py-2 hover:bg-violet-50 dark:hover:bg-violet-950/50 text-gray-700 dark:text-gray-200 font-semibold" data-id="${u.id}" data-days="90">90 Days</button>
+                <button class="set-premium-btn w-full text-left px-4 py-2 hover:bg-violet-50 dark:hover:bg-violet-950/50 text-gray-700 dark:text-gray-200 font-semibold" data-id="${u.id}" data-days="365">1 Year</button>
+              </div>
+            </div>
+            <button class="toggle-staff-btn text-[11px] font-bold text-indigo-600 hover:underline"
+              data-id="${u.id}" data-staff="${u.is_staff}">
+              ${u.is_staff ? 'Demote' : 'Admin'}
+            </button>
+            <button class="toggle-active-btn text-[11px] font-bold ${u.is_active ? 'text-rose-500 hover:underline' : 'text-emerald-600 hover:underline'}"
+              data-id="${u.id}" data-active="${u.is_active}">
+              ${u.is_active ? 'Deactivate' : 'Activate'}
+            </button>
+          </div>
         </td>
       </tr>`;
   }).join('');
+
+  // ── Premium dropdown toggle ───────────────────────────────────────────────
+  tbody.querySelectorAll('.premium-toggle-btn').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const isPremium = btn.dataset.premium === 'true';
+
+      if (isPremium) {
+        // Remove premium immediately
+        await supabase.from('users').update({ is_premium: false, premium_expires_at: null }).eq('id', btn.dataset.id);
+        showToast('Premium removed.', 'info');
+        await loadDashboard();
+      } else {
+        // Show duration picker
+        const picker = btn.nextElementSibling;
+        document.querySelectorAll('.premium-duration-picker').forEach((p) => { if (p !== picker) p.classList.add('hidden'); });
+        picker.classList.toggle('hidden');
+      }
+    });
+  });
+
+  // Duration picker buttons
+  tbody.querySelectorAll('.set-premium-btn').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const days    = parseInt(btn.dataset.days);
+      const userId  = btn.dataset.id;
+      const expiry  = new Date();
+      expiry.setDate(expiry.getDate() + days);
+
+      await supabase.from('users').update({
+        is_premium:         true,
+        premium_expires_at: expiry.toISOString(),
+      }).eq('id', userId);
+
+      showToast(`Premium activated for ${days} days!`, 'success');
+      await loadDashboard();
+    });
+  });
+
+  // Close picker on outside click
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.premium-duration-picker').forEach((p) => p.classList.add('hidden'));
+  });
 
   // Toggle admin role
   tbody.querySelectorAll('.toggle-staff-btn').forEach((btn) => {

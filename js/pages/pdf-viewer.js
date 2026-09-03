@@ -3,19 +3,7 @@ import { appStore } from '../store.js';
 import { renderHeader, renderFooter, setupHeaderEvents } from '../components.js';
 import { supabase } from '../supabase.js';
 
-// ── pdf.js — canvas-based rendering. This is the fix for the app-download
-// bug: Android WebView has no native PDF renderer, so an iframe pointed at
-// a PDF (or at Google's viewer) can fall back to a direct download instead
-// of showing a preview. Rendering to <canvas> via JS sidesteps that
-// completely — works identically on the website and inside the app.
-//
-// pdf.js itself is loaded globally from the CDN <script> tag in
-// pdf-viewer.html — that tag MUST appear before this module script for
-// `pdfjsLib` to exist here. We only point its worker at the matching
-// classic (non-module) CDN build. Guarded with typeof so a network hiccup
-// loading the CDN script doesn't crash this whole module (which would
-// silently break every other feature on the page — rating, report,
-// download, etc. all live in this same file).
+// ── pdf.js — canvas-based rendering ──────────────────────────────────────────
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -29,50 +17,44 @@ function getSession() {
   catch { return null; }
 }
 
+// ── Check if user has active Premium membership ───────────────────────────────
+async function checkUserPremiumStatus(session) {
+  if (!session?.id) return false;
+  try {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('is_premium, premium_expires_at, is_staff')
+      .eq('id', session.id)
+      .maybeSingle();
+
+    if (error || !user) return false;
+
+    // Staff members bypass restrictions
+    if (user.is_staff) return true;
+
+    if (!user.is_premium) return false;
+
+    // Check expiration timestamp if present
+    if (user.premium_expires_at) {
+      const expiresAt = new Date(user.premium_expires_at).getTime();
+      if (Number.isFinite(expiresAt) && expiresAt < Date.now()) {
+        return false; // Expired
+      }
+    }
+    return true;
+  } catch (err) {
+    console.error('Failed to verify premium status:', err);
+    return false;
+  }
+}
+
 // ── Star label map ────────────────────────────────────────────────────────────
 const STAR_LABELS = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
 
-// ══════════════════════════════════════════════════════════════════════════
-// AdMob (Google) interstitial config
-// ══════════════════════════════════════════════════════════════════════════
-// TODO: paste your real AdMob Interstitial ad unit ID below before you ship
-// this. Get it from: AdMob console → Apps → your app → Ad units →
-// Interstitial. It looks like 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY'.
-// Leaving this blank just means the app always falls back to the fixed
-// wait below instead of trying to load a real ad.
-const ADMOB_INTERSTITIAL_AD_UNIT_ID = ''; // <-- PASTE YOUR AD UNIT ID HERE
-
-// Requires `npm install @capacitor-community/admob` + AdMob App ID set up
-// in capacitor.config + native Android/iOS AdMob setup. Import is wrapped
-// in try/catch everywhere below so a missing/misconfigured plugin never
-// breaks the download flow — it just silently falls through to the fixed
-// wait instead of a real ad.
-
-// If no real ad could be loaded/shown (plain website — AdMob is native-app
-// only — a failed ad load, or no ad unit ID pasted in yet), wait this many
-// seconds with the placeholder shown, then continue straight to the
-// download automatically. No manual "skip" button by design.
-const AD_FALLBACK_WAIT_SECONDS = 5;
-
-// Safety net: if AdMob's own load/show/dismiss events never fire for any
-// reason, don't hang the UI forever — fall through to the fixed wait above.
-const ADMOB_EVENT_TIMEOUT_MS = 8000;
-
-let admobInitialized = false;
-
 // ── Native-app detection + platform-safe helpers ────────────────────────────
-// Runs unchanged on the website (isNativeApp() is false there, so it just
-// does the normal browser behaviour). Inside the Capacitor app it switches
-// to native plugins automatically — no future edits needed here.
 const isNativeApp = () =>
   !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 
-// Opens a URL — new browser tab on web, in-app browser inside the app.
-// This is also what actually *triggers the download*: the PDF's
-// Content-Disposition/mime headers make the browser/OS download it
-// straight away instead of navigating to it. (This is the exact mechanism
-// the old "Open" button used — it's simply more reliable than fetching the
-// file into memory and writing it via the Filesystem plugin.)
 function getDownloadUrl(fileUrl) {
   if (typeof fileUrl !== 'string' || !fileUrl.trim()) {
     throw new Error('This note does not have a valid PDF link.');
@@ -89,8 +71,7 @@ function getDownloadUrl(fileUrl) {
     throw new Error('This note does not have a valid PDF link.');
   }
 
-  // Cloudinary otherwise serves raw PDFs inline. fl_attachment makes the
-  // browser download the file instead of trying to render its URL as a page.
+  // Cloudinary: fl_attachment forces download instead of opening inline
   if (url.hostname === 'res.cloudinary.com' && /\/(raw|image|video)\/upload\//.test(url.pathname) && !url.pathname.includes('/fl_attachment/')) {
     url.pathname = url.pathname.replace(/\/(raw|image|video)\/upload\//, '/$1/upload/fl_attachment/');
   }
@@ -107,13 +88,14 @@ async function openExternal(url) {
       return;
     } catch (err) { /* fall through to web behaviour */ }
   }
-  // This runs after the ad wait, so window.open may be blocked as a popup.
   window.location.assign(downloadUrl);
 }
 
-// ── PDF render state ─────────────────────────────────────────────────────────
+// ── Global Viewer State ───────────────────────────────────────────────────────
 let pdfDoc = null;
 let currentPageNum = 1;
+let isUserPremium = false;
+let maxAllowedPage = 1;
 
 // ── Page init ────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -129,6 +111,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     showNotFound();
     return;
   }
+
+  // Check live premium status
+  isUserPremium = await checkUserPremiumStatus(session);
 
   // ── Fetch note from Supabase ──────────────────────────────────────────────
   const { data: note, error } = await supabase
@@ -182,6 +167,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ── Render ────────────────────────────────────────────────────────────────
   renderPage(note, uploaderName, existingRating, session);
+
+  // ── Setup Premium Modal Events ────────────────────────────────────────────
+  setupPremiumModal(session);
 
   // ── Report modal ──────────────────────────────────────────────────────────
   document.getElementById('close-report-modal-btn')?.addEventListener('click', () => {
@@ -265,9 +253,9 @@ function renderPage(note, uploaderName, existingRating, session) {
         <span>Report</span>
       </button>
       <button id="download-btn-desktop"
-        class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md transition-all">
-        <span class="material-symbols-outlined text-base">download</span>
-        <span>Download PDF</span>
+        class="inline-flex items-center gap-2 px-5 py-2 rounded-xl ${isUserPremium ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-amber-500 hover:bg-amber-600 text-white'} text-xs font-bold shadow-md transition-all">
+        <span class="material-symbols-outlined text-base">${isUserPremium ? 'download' : 'lock'}</span>
+        <span>${isUserPremium ? 'Download PDF' : 'Download (Premium)'}</span>
       </button>
     </div>
 
@@ -280,8 +268,9 @@ function renderPage(note, uploaderName, existingRating, session) {
       <div id="pdf-3dot-dropdown"
         class="hidden absolute right-0 top-10 z-30 w-52 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xl py-2 text-xs font-semibold">
         <button id="download-btn-mobile"
-          class="w-full flex items-center gap-2.5 px-4 py-2.5 text-gray-800 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 hover:text-indigo-600">
-          <span class="material-symbols-outlined text-base">download</span> Download PDF
+          class="w-full flex items-center gap-2.5 px-4 py-2.5 ${isUserPremium ? 'text-gray-800 dark:text-gray-200' : 'text-amber-600 dark:text-amber-400'} hover:bg-indigo-50 dark:hover:bg-indigo-950/50">
+          <span class="material-symbols-outlined text-base">${isUserPremium ? 'download' : 'lock'}</span>
+          ${isUserPremium ? 'Download PDF' : 'Download (Premium)'}
         </button>
         <button id="rate-note-btn-mobile"
           class="w-full flex items-center gap-2.5 px-4 py-2.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/50">
@@ -361,15 +350,6 @@ function renderPage(note, uploaderName, existingRating, session) {
       ${note.description ? `<p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed pt-3 border-t border-gray-100 dark:border-gray-800">${note.description}</p>` : ''}
     </div>
 
-    <!-- Bottom banner ad slot — ALWAYS visible (not gated behind download).
-         Reserved space for a small banner ad tag; paste your ad network
-         code where marked below. -->
-    <div id="ad-slot-bottom" class="bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800 min-h-[90px] flex flex-col items-center justify-center gap-1 py-4 px-4 text-center">
-      <span class="material-symbols-outlined text-2xl text-gray-300 dark:text-gray-700">campaign</span>
-      <span class="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wide">Advertisement</span>
-      <!-- YOUR BANNER AD CODE HERE -->
-    </div>
-
     <!-- PDF Viewer -->
     <div class="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
 
@@ -381,9 +361,9 @@ function renderPage(note, uploaderName, existingRating, session) {
         </div>
         <div class="flex items-center gap-2 flex-wrap">
           <button id="download-and-show-ad"
-            class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all shadow-sm flex items-center gap-1 text-xs">
-            <span class="material-symbols-outlined text-sm">download</span>
-            <span>Download</span>
+            class="px-3.5 py-1.5 rounded-lg ${isUserPremium ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-amber-500 hover:bg-amber-600 text-white'} font-bold transition-all shadow-sm flex items-center gap-1.5 text-xs">
+            <span class="material-symbols-outlined text-sm">${isUserPremium ? 'download' : 'lock'}</span>
+            <span>${isUserPremium ? 'Download' : 'Download (Premium)'}</span>
           </button>
         </div>
       </div>
@@ -394,20 +374,38 @@ function renderPage(note, uploaderName, existingRating, session) {
           <span class="material-symbols-outlined text-2xl animate-spin">progress_activity</span>
           <span>PDF load hocche…</span>
         </div>
-        <div id="pdf-render-area" class="hidden w-full flex justify-center"></div>
+        <div id="pdf-render-area" class="hidden w-full flex flex-col items-center"></div>
+
+        <!-- 40% Limit Reached Banner for Free Users -->
+        <div id="pdf-preview-lock-banner" class="hidden m-4 p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-indigo-500/10 border border-amber-500/30 text-center space-y-2.5">
+          <div class="flex items-center justify-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold text-xs uppercase tracking-wider">
+            <span class="material-symbols-outlined text-base">lock</span>
+            <span>40% Free Preview Limit Reached</span>
+          </div>
+          <p class="text-xs text-gray-600 dark:text-gray-300 max-w-sm mx-auto">
+            You've viewed all free preview pages. Upgrade to Premium to read the complete note and download the PDF.
+          </p>
+          <button id="preview-unlock-btn" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md transition-all">
+            <span class="material-symbols-outlined text-sm">workspace_premium</span>
+            <span>Unlock Full Document</span>
+          </button>
+        </div>
       </div>
 
       <!-- Pager -->
-      <div class="bg-gray-100 dark:bg-gray-800 px-4 py-2.5 flex items-center justify-center gap-3 border-t border-b border-gray-200 dark:border-gray-700 text-xs">
-        <button id="pdf-prev-page" disabled
-          class="p-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 disabled:opacity-40 transition-colors">
-          <span class="material-symbols-outlined text-base">chevron_left</span>
-        </button>
-        <span class="font-bold text-gray-700 dark:text-gray-200">Page <span id="pdf-current-page">1</span> / <span id="pdf-total-pages">—</span></span>
-        <button id="pdf-next-page" disabled
-          class="p-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 disabled:opacity-40 transition-colors">
-          <span class="material-symbols-outlined text-base">chevron_right</span>
-        </button>
+      <div class="bg-gray-100 dark:bg-gray-800 px-4 py-2.5 flex items-center justify-between gap-3 border-t border-b border-gray-200 dark:border-gray-700 text-xs flex-wrap">
+        <div id="pdf-preview-badge-container"></div>
+        <div class="flex items-center gap-3 mx-auto">
+          <button id="pdf-prev-page" disabled
+            class="p-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 disabled:opacity-40 transition-colors">
+            <span class="material-symbols-outlined text-base">chevron_left</span>
+          </button>
+          <span class="font-bold text-gray-700 dark:text-gray-200">Page <span id="pdf-current-page">1</span> / <span id="pdf-total-pages">—</span></span>
+          <button id="pdf-next-page" disabled
+            class="p-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 disabled:opacity-40 transition-colors">
+            <span class="material-symbols-outlined text-base">chevron_right</span>
+          </button>
+        </div>
       </div>
 
       <!-- Fallback link -->
@@ -415,8 +413,9 @@ function renderPage(note, uploaderName, existingRating, session) {
         <p class="text-[11px] text-gray-400">If the viewer doesn't load, download the PDF directly:</p>
         <div class="flex justify-center gap-3 flex-wrap">
           <button id="fallback-download-pdf-link"
-            class="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 inline-flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-sm">download</span> Download
+            class="px-4 py-2 ${isUserPremium ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-500 hover:bg-amber-600'} text-white text-xs font-bold rounded-xl inline-flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-sm">${isUserPremium ? 'download' : 'lock'}</span>
+            <span>${isUserPremium ? 'Download' : 'Download (Premium)'}</span>
           </button>
         </div>
       </div>
@@ -453,108 +452,67 @@ function renderPage(note, uploaderName, existingRating, session) {
   dotBtn?.addEventListener('click', (e) => { e.stopPropagation(); dotDrop.classList.toggle('hidden'); });
   document.addEventListener('click', () => dotDrop?.classList.add('hidden'));
 
-  // ── Download triggers — all routed through the same ad → redirect flow ───
+  // ── Download triggers ─────────────────────────────────────────────────────
   document.getElementById('download-and-show-ad')?.addEventListener('click', () => handleDownloadClick(note));
   document.getElementById('download-btn-desktop')?.addEventListener('click', () => handleDownloadClick(note));
   document.getElementById('download-btn-mobile')?.addEventListener('click', () => handleDownloadClick(note));
   document.getElementById('fallback-download-pdf-link')?.addEventListener('click', () => handleDownloadClick(note));
+
+  // Inline unlock button
+  document.getElementById('preview-unlock-btn')?.addEventListener('click', openPremiumModal);
 
   // ── Load the PDF into the canvas viewer ───────────────────────────────────
   loadPdfViewer(note.file_url);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// Download flow: play an interstitial ad, then redirect straight to the
-// file so the browser/OS handles the actual download.
+// Premium Modal Handling
 // ══════════════════════════════════════════════════════════════════════════
 
-function showAdWaitModal() {
-  document.getElementById('ad-modal')?.classList.remove('hidden');
-}
-function hideAdWaitModal() {
-  document.getElementById('ad-modal')?.classList.add('hidden');
-}
-function fixedWait(seconds) {
-  return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
-}
+function openPremiumModal() {
+  const modal = document.getElementById('premium-modal');
+  if (!modal) return;
 
-async function ensureAdMobInitialized(AdMob) {
-  if (admobInitialized) return;
-  try {
-    await AdMob.initialize();
-    admobInitialized = true;
-  } catch (err) {
-    // Ignore — prepareInterstitial below will fail too, and we fall back
-    // to the fixed wait.
+  const session = getSession();
+  const actionBtn  = document.getElementById('premium-action-btn');
+  const actionText = document.getElementById('premium-action-text');
+
+  if (!session) {
+    actionBtn.href = './login.html';
+    if (actionText) actionText.textContent = 'Sign In to Unlock';
+  } else {
+    actionBtn.href = './profile.html';
+    if (actionText) actionText.textContent = 'Upgrade to Premium';
   }
+
+  modal.classList.remove('hidden');
 }
 
-// Tries to load + show a real AdMob interstitial. Resolves TRUE only if a
-// real ad was actually shown and then dismissed by the user. Resolves
-// FALSE for every other case (plain website, no ad unit ID pasted in yet,
-// load failure, plugin missing, or the safety timeout) — the caller then
-// falls back to the fixed wait instead.
-async function playAdMobInterstitial() {
-  if (!isNativeApp()) return false;
-  if (!ADMOB_INTERSTITIAL_AD_UNIT_ID) return false;
-
-  try {
-    const { AdMob } = await import('@capacitor-community/admob');
-    await ensureAdMobInitialized(AdMob);
-
-    return await new Promise((resolve) => {
-      let settled = false;
-      let loadedListener, failedListener, dismissedListener;
-
-      const finish = (result) => {
-        if (settled) return;
-        settled = true;
-        loadedListener?.remove();
-        failedListener?.remove();
-        dismissedListener?.remove();
-        clearTimeout(safety);
-        resolve(result);
-      };
-
-      const safety = setTimeout(() => finish(false), ADMOB_EVENT_TIMEOUT_MS);
-
-      loadedListener = AdMob.addListener('onInterstitialAdLoaded', async () => {
-        try { await AdMob.showInterstitial(); }
-        catch (err) { finish(false); }
-      });
-      failedListener = AdMob.addListener('onInterstitialAdFailedToLoad', () => finish(false));
-      dismissedListener = AdMob.addListener('onInterstitialAdDismissed', () => finish(true));
-
-      AdMob.prepareInterstitial({
-        adId: ADMOB_INTERSTITIAL_AD_UNIT_ID,
-        isTesting: false,
-      }).catch(() => finish(false));
-    });
-  } catch (err) {
-    // Plugin not installed, or import failed for any other reason.
-    return false;
-  }
+function setupPremiumModal(session) {
+  document.getElementById('premium-close-btn')?.addEventListener('click', () => {
+    document.getElementById('premium-modal')?.classList.add('hidden');
+  });
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+// Download Flow (Only for Premium Users)
+// ══════════════════════════════════════════════════════════════════════════
 
 async function handleDownloadClick(note) {
-  showAdWaitModal();
-
-  const realAdShown = await playAdMobInterstitial();
-  if (!realAdShown) {
-    await fixedWait(AD_FALLBACK_WAIT_SECONDS);
+  // Block non-premium users from downloading
+  if (!isUserPremium) {
+    openPremiumModal();
+    return;
   }
 
-  hideAdWaitModal();
-
+  // Update download count on database
   const { error: rpcErr } = await supabase.rpc('increment_note_downloads', { note_id: Number(note.id) });
   if (!rpcErr) {
     const el = document.getElementById('live-download-count');
     if (el) el.textContent = (parseInt(el.textContent, 10) || 0) + 1;
   }
 
-  // Redirect straight to the file — this is what actually triggers the
-  // download (the file's headers make the browser/OS download it instead
-  // of navigating to it), same as the old "Open" button did.
+  // Trigger file download immediately
   try {
     await openExternal(note.file_url);
   } catch (err) {
@@ -583,20 +541,38 @@ async function loadPdfViewer(fileUrl) {
     const loadingTask = pdfjsLib.getDocument(fileUrl);
     pdfDoc = await loadingTask.promise;
 
-    totalPagesLabel.textContent = pdfDoc.numPages;
+    const totalPages = pdfDoc.numPages;
+    // Calculate 40% page limit for free users
+    maxAllowedPage = isUserPremium ? totalPages : Math.max(1, Math.ceil(totalPages * 0.4));
+
+    totalPagesLabel.textContent = totalPages;
     loadingEl.classList.add('hidden');
     renderArea.classList.remove('hidden');
+
+    // Show preview badge if non-premium and multi-page
+    const badgeContainer = document.getElementById('pdf-preview-badge-container');
+    if (badgeContainer && !isUserPremium && totalPages > 1) {
+      badgeContainer.innerHTML = `
+        <span class="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 font-bold text-[10px] flex items-center gap-1">
+          <span class="material-symbols-outlined text-xs">lock</span> 40% Preview (${maxAllowedPage} of ${totalPages} pages)
+        </span>
+      `;
+    }
 
     await renderPdfPage(1);
 
     prevBtn.disabled = true;
-    nextBtn.disabled = pdfDoc.numPages <= 1;
+    nextBtn.disabled = maxAllowedPage <= 1;
 
     prevBtn.addEventListener('click', () => {
       if (currentPageNum > 1) renderPdfPage(currentPageNum - 1);
     });
     nextBtn.addEventListener('click', () => {
-      if (currentPageNum < pdfDoc.numPages) renderPdfPage(currentPageNum + 1);
+      if (currentPageNum < maxAllowedPage) {
+        renderPdfPage(currentPageNum + 1);
+      } else if (!isUserPremium) {
+        openPremiumModal();
+      }
     });
   } catch (err) {
     loadingEl.innerHTML = `
@@ -608,6 +584,12 @@ async function loadPdfViewer(fileUrl) {
 
 async function renderPdfPage(num) {
   if (!pdfDoc) return;
+  // Guard against exceeding preview limit
+  if (!isUserPremium && num > maxAllowedPage) {
+    openPremiumModal();
+    return;
+  }
+
   const page        = await pdfDoc.getPage(num);
   const renderArea  = document.getElementById('pdf-render-area');
   const wrapWidth   = renderArea.clientWidth || 700;
@@ -632,7 +614,17 @@ async function renderPdfPage(num) {
   currentPageNum = num;
   document.getElementById('pdf-current-page').textContent = num;
   document.getElementById('pdf-prev-page').disabled = num <= 1;
-  document.getElementById('pdf-next-page').disabled = num >= pdfDoc.numPages;
+  document.getElementById('pdf-next-page').disabled = num >= maxAllowedPage;
+
+  // Toggle 40% limit banner when user reaches the preview ceiling
+  const lockBanner = document.getElementById('pdf-preview-lock-banner');
+  if (lockBanner) {
+    if (!isUserPremium && num >= maxAllowedPage && maxAllowedPage < pdfDoc.numPages) {
+      lockBanner.classList.remove('hidden');
+    } else {
+      lockBanner.classList.add('hidden');
+    }
+  }
 }
 
 // ── Rating modal logic ────────────────────────────────────────────────────────
@@ -728,5 +720,5 @@ function openRatingModal(existingRating) {
 
 // ── Rating modal setup ────────────────────────────────────────────────────────
 function setupRatingModal(note, existingRating, session) {
-  // Already wired in renderPage — nothing extra needed here
+  // Wired in renderPage
 }
